@@ -15,13 +15,13 @@ endif
 
 BISON_OUT		= $(subst .y,,$(BISON_FILE)).tab.c $(subst .y,,$(BISON_FILE)).tab.h
 LEX_OUT			= $(subst .l,,$(LEX_FILE)).yy.c
-LEX_ONLY_OUT	= $(subst .l,,$(LEX_FILE)).only.yy.c
+LEX_OUT_ONLY	= $(subst .l,,$(LEX_FILE)).only.yy.c
 CFLAGS			= -g
 
 # Flex ==========================================================================================
 $(LEX_OUT):$(LEX_FILE) $(BISON_OUT)
 	flex --outfile=$@ $<
-$(LEX_ONLY_OUT):$(LEX_FILE)
+$(LEX_OUT_ONLY):$(LEX_FILE)
 	flex --outfile=$@ $<
 
 # Bison =========================================================================================
@@ -31,7 +31,7 @@ $(BISON_OUT):$(BISON_FILE)
 # Run ===========================================================================================
 $(proj).out:$(LEX_OUT) $(BISON_OUT)
 	gcc $(CFLAGS) $(word 1,$^) $(word 2,$^) -o $@
-$(proj).lex:$(LEX_ONLY_OUT)
+$(proj).lex:$(LEX_OUT_ONLY)
 	gcc $(CFLAGS) $(word 1,$^) -o $@
 
 run:$(proj).out
@@ -42,7 +42,7 @@ run_lex:$(proj).lex
 	read file; \
 	./$< $$file
 
-PHONY += run run_wc
+PHONY += run run_wc run_lex
 # Clean =========================================================================================
 clean:
 	-rm *.out *.lex *.yy.c *.tab.h *.tab.c *.s
