@@ -8,13 +8,13 @@ A flex program consists of the following three sections, separated by %% lines:
 
 |Section|Functions|
 |-|-|
-|First section<a id='1st_sec'></a>|1. The first section contains declarations and option settings<br>2. code inside of `%{` and `%}` is copied to the generated C files|
-|Second section<a id='2nd_sec'></a>|1. The second section is a list of patterns and actions<br>2. Formatted as `<RegExpr>    {<action1>,<action2,...>}`|
-|Third section<a id='3rd_sec'></a>|The third section is C code that is copied to the generated scanner|
+|First section<a id=1st_sec></a>|1. The first section contains declarations and option settings<br>2. code inside of `%{` and `%}` is copied to the generated C files|
+|Second section<a id=2nd_sec></a>|1. The second section is a list of patterns and actions<br>2. Formatted as `<RegExpr>    {<action1>,<action2,...>}`|
+|Third section<a id=3rd_sec></a>|The third section is C code that is copied to the generated scanner|
 
 ## Start condition
 
-Used to specify regular expressions' activation status, for a defined start condition `sc`, expressions with prefix of `<sc>` would only be activated when condition is satisfied such as after `BEGIN sc` macro called.
+Used to specify regular expressions' activation status, for a defined start condition `sc`, expressions with prefix of `<sc>` would only be activated when condition is satisfied such as using `BEGIN sc` [macro](#macro).
 
 Start condition can be classified as:
 
@@ -23,9 +23,9 @@ Start condition can be classified as:
 
 ### Define a start condition
 
-Using `%x <sc_name>` to define an [exclusive start condition](#mk1)
+Using `%x <sc_name>` in [first section](#1st_sec) to define an [exclusive start condition](#mk1)
 
-Using `%x <sc_name>` to define an [inclusive start condition](#mk2)
+Using `%x <sc_name>` in [first section](#1st_sec) to define an [inclusive start condition](#mk2)
 
 ### Start condition expression
 
@@ -39,6 +39,14 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 ## Options
 
 1. `%option noyywrap` do not call `yywrap()`, which is an I/O macro in flex library. Always use it when applying user defined `main` function
+2. `%option nodefault` do not include the default library, removes the `-lfl` option while using gcc building lex files
+3. `%option yylineno` define variable `yylineno` to automatically track the current line number in the file
+
+## Macro
+
+1. `BEGIN` Switch to target [start condition](#start-condition), e.g. `BEGIN sc` switch to `sc` condition
+2. `ECHO` equivalent to `fprintf(yyout, "%s", yytext);`
+3. `yyout` current output file
 
 ## Useful regular expression
 
