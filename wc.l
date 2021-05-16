@@ -1,7 +1,7 @@
 %option noyywrap
 %option nodefault
 %{
-    #include <stdio.h>
+#include <calc.tab.h>
     int words = 0;
     int chars = 0;
     int lines = 0;

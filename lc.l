@@ -1,7 +1,5 @@
 %option noyywrap
 %option nodefault
-%option yylineno
-
 %x IFILE
 
 %{
@@ -21,11 +19,7 @@
     int popfile(void);
 %}
 %%
-
-^"#"[ \t]*include[ \t]*\[\"<] { BEGIN IFILE; }  /* 
-                                                  ^"#" = "\n#" matches "#" at the begining of line
-                                                  [ \t]* means multiple or zero space or tab 
-                                                */
+^"#"[ \t]*include[ \t]*[\"<] { BEGIN IFILE; }
 <IFILE>[^ \t\n\">]+ {
                         { 
                             int c;
@@ -54,8 +48,9 @@ int main(int argc, char **argv)
 {
     int i;
     for(i=1;i<argc;i++) {
-        if(newfile(argv[i]))
-        yylex();
+        if(newfile(argv[i])){
+            yylex();
+        }
     }
     return 0;
 }
@@ -63,17 +58,15 @@ int newfile(char *fn)
 {
     FILE *fp = fopen(fn, "r");
     bufstack *bs = malloc(sizeof(bufstack));
-
-    if(fp){
+    if(!fp){
         perror(fn);
         return 0;
     }
-
     if(curr_bs){
         curr_bs->lineno = yylineno;
-        bs->prev = curr_bs;
     }
-
+    
+    bs->prev = curr_bs;
     bs->bs = yy_create_buffer(fp, YY_BUF_SIZE);
     bs->fp = fp;
     bs->filename = fn;
