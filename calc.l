@@ -1,7 +1,7 @@
 %option noyywrap
 
 %{
-    # include "yacc.tab.h"
+    # include "calc.tab.h"
 %}
 
 %%

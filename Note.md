@@ -1,3 +1,5 @@
+Current Mark: 2
+
 # Flex
 
 ## Basic structure
@@ -10,7 +12,26 @@ A flex program consists of the following three sections, separated by %% lines:
 |Second section<a id='2nd_sec'></a>|1. The second section is a list of patterns and actions<br>2. Formatted as `<RegExpr>    {<action1>,<action2,...>}`|
 |Third section<a id='3rd_sec'></a>|The third section is C code that is copied to the generated scanner|
 
-## Useful rules
+## Start condition
+
+Used to specify regular expressions' activation status, for a defined start condition `sc`, expressions with prefix of `<sc>` would only be activated when condition is satisfied such as after `BEGIN sc` macro called.
+
+Start condition can be classified as:
+
+1. <a id=mk1></a>Exclusive condition: when condition `sc` is satisfied, only expressions with prefix `<sc>` is activated
+2. <a id=mk2></a>Inclusive condition: when condition `sc` is satisfied, both expressions without prefix or with prefix `<sc>` is activated
+
+### Define a start condition
+
+Using `%x <sc_name>` to define an [exclusive start condition](#mk1)
+
+Using `%x <sc_name>` to define an [inclusive start condition](#mk2)
+
+### Start condition expression
+
+To define a start condition `sc` specific expression, using `<sc>...` while `...` represent the regular expression.
+
+## Scanning patterns
 
 1. Flex breaks a tie by preferring longer matches
 2. If two patterns match the same thing, it prefers the pattern that appears first in the flex program
@@ -35,3 +56,4 @@ A flex program consists of the following three sections, separated by %% lines:
 6. `?` Matches zero or one occurrence of the preceding regular expression, e.g. `-?[0-9]+` matches a signed number including an optional leading minus sign
 7. `/` Matches character with specified following characters, e.g. `0/1` will match `0` within the text of `01`, but not `02`
 8. `()` Groups a series of regular expressions together into a new regular expression, e.g. `([0-9]+)?` matches empty or an integer digit
+9. `^` Matches the beginning of a line as the first character of a regular expression.

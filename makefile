@@ -4,47 +4,50 @@
 # $?  表示比目标还要新的依赖文件列表
 # Variables =====================================================================================
 PHONY 			= 
-proj 		= main
-file 		= 
-ifeq ($(proj),wc)
-	LEX_FILE = wc.l
-else
+proj 			= 
+ifeq ($(proj),)
 	LEX_FILE	= lex.l
 	BISON_FILE	= yacc.y
+else
+	LEX_FILE 	= $(proj).l
+	BISON_FILE	= $(proj).y
 endif
-ifneq ($(BISON_FILE),)
-	BISON_OUT	= $(subst .y,,$(BISON_FILE)).tab.c $(subst .y,,$(BISON_FILE)).tab.h
-endif
-LEX_OUT		= $(subst .l,,$(LEX_FILE)).yy.c
-CFLAGS		= -g
+
+BISON_OUT		= $(subst .y,,$(BISON_FILE)).tab.c $(subst .y,,$(BISON_FILE)).tab.h
+LEX_OUT			= $(subst .l,,$(LEX_FILE)).yy.c
+LEX_ONLY_OUT	= $(subst .l,,$(LEX_FILE)).only.yy.c
+CFLAGS			= -g
 
 # Flex ==========================================================================================
 $(LEX_OUT):$(LEX_FILE) $(BISON_OUT)
 	flex --outfile=$@ $<
+$(LEX_ONLY_OUT):$(LEX_FILE)
+	flex --outfile=$@ $<
 
 # Bison =========================================================================================
 $(BISON_OUT):$(BISON_FILE)
-ifneq ($(BISON_FILE),)
 	bison -d $<
-endif
 
 # Run ===========================================================================================
 $(proj).out:$(LEX_OUT) $(BISON_OUT)
-ifneq ($(BISON_FILE),)
 	gcc $(CFLAGS) $(word 1,$^) $(word 2,$^) -o $@
-else
+$(proj).lex:$(LEX_ONLY_OUT)
 	gcc $(CFLAGS) $(word 1,$^) -o $@
-endif
 
 run:$(proj).out
-	./$< $(file)
+	./$<
+
+run_lex:$(proj).lex
+	@echo "Please type in file names: "; \
+	read file; \
+	./$< $$file
 
 PHONY += run run_wc
 # Clean =========================================================================================
 clean:
-	-rm *.out *.yy.c *.tab.h *.tab.c *.s
+	-rm *.out *.lex *.yy.c *.tab.h *.tab.c *.s
 cleansp:
-	-rm $(proj).out $(BISON_OUT) $(LEX_OUT)
+	-rm $(proj).out $(proj).lex $(BISON_OUT) $(LEX_OUT)
 
 PHONY += clean cleansp
 # GitHub ========================================================================================
