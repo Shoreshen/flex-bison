@@ -65,3 +65,5 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 7. `/` Matches character with specified following characters, e.g. `0/1` will match `0` within the text of `01`, but not `02`
 8. `()` Groups a series of regular expressions together into a new regular expression, e.g. `([0-9]+)?` matches empty or an integer digit
 9. `^` Matches the beginning of a line as the first character of a regular expression.
+10. `r/s` an `r` but only if it is followed by an `s`.
+11. `r$` an `r`, but only at the end of a line (i.e., just before a newline). Equivalent to `r/\n`
