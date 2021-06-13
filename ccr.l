@@ -214,7 +214,7 @@ int newfile(char *fn)
     bs->prev = curr_bs;
     bs->bs = yy_create_buffer(fp, YY_BUF_SIZE);
     bs->fp = fp;
-    bs->filename = fn; //Passing in yylex, which consider destroyed after yyterminate()
+    bs->filename = fn;
     yy_switch_to_buffer(bs->bs);
     curr_bs = bs;
     yylineno = 1;
@@ -229,7 +229,9 @@ int popfile(void)
     if(!bs){
         return 0;
     }
-    
+       
+    // yy_delete_buffer(bs->bs); Cannot use since newfile(yytext) will be destroyed
+
     fclose(bs->fp);
 
     curr_bs = bs->prev;
