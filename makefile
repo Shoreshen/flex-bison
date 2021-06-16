@@ -5,39 +5,56 @@
 # Variables =====================================================================================
 PHONY 			= 
 proj 			= 
-ifeq ($(proj),)
-	LEX_FILE	= lex.l
-	BISON_FILE	= yacc.y
-else
-	LEX_FILE 	= $(proj).l
-	BISON_FILE	= $(proj).y
-endif
 
-BISON_OUT		= $(subst .y,,$(BISON_FILE)).tab.c $(subst .y,,$(BISON_FILE)).tab.h
-LEX_OUT			= $(subst .l,,$(LEX_FILE)).yy.c
-LEX_OUT_ONLY	= $(subst .l,,$(LEX_FILE)).only.yy.c
-CFLAGS			= -g
+ALL_FILES	:= $(filter $(proj).%,$(shell ls | grep "^$(proj)\.[a-z]*$$"))
+LEX_FILE 	:= $(filter %.l, $(ALL_FILES))
+BISON_FILE	:= $(filter %.y, $(ALL_FILES))
+C_FILE		:= $(filter %.c, $(ALL_FILES))
+H_FILE		:= $(filter %.h, $(ALL_FILES))
 
+BISON_OUT_H	:= $(subst .y,.tab.h,$(BISON_FILE)) 
+BISON_OUT_C	:= $(subst .y,.tab.c,$(BISON_FILE))
+BISON_OUT	:= $(BISON_OUT_C) $(BISON_OUT_H)
+LEX_OUT		:= $(subst .l,.yy.c,$(LEX_FILE))
+LEX_TRG		:= $(LEX_FILE)
+LEX_DEP		:= $(LEX_FILE) $(BISON_OUT_H)
+GCC_TRG		:= $(BISON_OUT_C) $(LEX_OUT) $(C_FILE) 
+GCC_DEP		:= $(GCC_TRG) $(H_FILE) $(BISON_OUT_H)
+
+
+CFLAGS		= -g
+test:
+	@echo $(proj)
+	@echo $(ALL_FILES)
+	@echo $(LEX_FILE)
+	@echo $(BISON_FILE)
+	@echo $(C_FILE)
+	@echo $(BISON_OUT_C)
+	@echo $(LEX_OUT)
+	@echo $(GCC_TRG)
+	@echo $(GCC_DEP)
 # Flex ==========================================================================================
-$(LEX_OUT):$(LEX_FILE) $(BISON_OUT)
-	flex --outfile=$@ $<
-$(LEX_OUT_ONLY):$(LEX_FILE)
-	flex --outfile=$@ $<
+$(LEX_OUT):$(LEX_DEP)
+ifneq (,$(LEX_TRG))
+	flex --outfile=$@ $(LEX_TRG)
+endif
 
 # Bison =========================================================================================
 $(BISON_OUT):$(BISON_FILE)
+ifneq (,$(BISON_FILE))
 	bison -d $<
+endif
 
 # Run ===========================================================================================
-$(proj).out:$(LEX_OUT) $(BISON_OUT)
-	gcc $(CFLAGS) $(word 1,$^) $(word 2,$^) -o $@
-$(proj).lex:$(LEX_OUT_ONLY)
-	gcc $(CFLAGS) $(word 1,$^) -o $@
+$(proj).out:$(GCC_DEP)
+ifneq (,$(GCC_TRG))
+	gcc $(CFLAGS) $(GCC_TRG) -o $@
+endif
 
 run:$(proj).out
 	./$<
 
-run_lex:$(proj).lex
+run_lex:$(proj).out
 	@echo "Please type in file names: "; \
 	read file; \
 	./$< $$file
