@@ -14,7 +14,7 @@
     double d;
 }
 /* declare tokens */
-%token <d> NUMBER
+%token <d> NUMBER 
 %token EOL
 
 %type <a> exp factor term
@@ -22,11 +22,11 @@
 %%
 
 calclist: /* nothing */
-| calclist exp EOL {
-     printf("= %4.4g\n", eval($2));
-    //  treefree($2);
-     printf("> ");
- }
+| calclist exp EOL  {
+                        printf("= %4.4g\n", eval($2));
+                        treefree($2); 
+                        printf("> ");
+                    }
 
  | calclist EOL { printf("> "); } /* blank line or a comment */
  ;
