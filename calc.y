@@ -1,56 +1,49 @@
 /* simplest version of calculator */
 %{
-    #include "calc.h"
+#include <stdio.h>
 %}
-
-/*
-  Each symbol in bison had a value
-  By defualt, the value is type of int
-  If %union defined, the value is the union type
-  The current token'value is referenced as yylval
-*/
-%union {
-    struct ast *a;
-    double d;
-}
 /* declare tokens */
-%token <d> NUMBER
+%token NUMBER
+%token ADD SUB MUL DIV ABS
 %token EOL
-
-%type <a> exp factor term
+%token OP CP
+%token HEX
 
 %%
-
+//Start symbol is left side of the first rule
 calclist: /* nothing */
-| calclist exp EOL {
-     printf("= %4.4g\n", eval($2));
-     treefree($2);
-     printf("> ");
- }
+    | calclist exp EOL { printf("= %d\n", $2); }
+    | EOL
+;
 
- | calclist EOL { printf("> "); } /* blank line or a comment */
- ;
- /*
-    The value of target symbol is referenced as $$
-    The value of symbols at right are referecned from $1 to $n, left to right
- */
-exp: factor
- | exp '+' factor { $$ = newast('+', $1,$3); }
- | exp '-' factor { $$ = newast('-', $1,$3);}
- ;
- /*
-    Literal character token such as '*' is used to match "*"
-    The value type of it by defualt is int
-    The value is the ACSII value of the character
- */
-factor: term
- | factor '*' term { $$ = newast('*', $1,$3); }
- | factor '/' term { $$ = newast('/', $1,$3); }
- ;
+exp: 
+    factor  /*default $$ = $1*/
+    | exp ABS factor { $$ = $1 | $3; }
+    | exp ADD factor { $$ = $1 + $3; }
+    | exp SUB factor { $$ = $1 - $3; }
+;
 
-term: NUMBER   { $$ = newnum($1); }
- | '|' term    { $$ = newast('|', $2, NULL); }
- | '(' exp ')' { $$ = $2; }
- | '-' term    { $$ = newast('M', $2, NULL); }
- ;
+factor: 
+    term /*default $$ = $1*/
+    | factor MUL term { $$ = $1 * $3; }
+    | factor DIV term { $$ = $1 / $3; }
+;
+
+term: 
+    NUMBER /*default $$ = $1*/
+    | HEX 
+    | ABS term { $$ = $2 >= 0? $2 : - $2; }
+    | OP exp CP {$$ = $2;}
+;
+
 %%
+
+int main(int argc, char **argv)
+{
+    yyparse();
+    return 0;
+}
+yyerror(char *s)
+{
+    fprintf(stderr, "error: %s\n", s);
+}
