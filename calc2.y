@@ -24,7 +24,7 @@
 calclist: /* nothing */
 | calclist exp EOL {
      printf("= %4.4g\n", eval($2));
-     treefree($2);
+    //  treefree($2);
      printf("> ");
  }
 

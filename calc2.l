@@ -1,4 +1,4 @@
-%option noyywrap
+%option noyywrap yylineno nodefault
 
 %{
     #include "calc2.h"

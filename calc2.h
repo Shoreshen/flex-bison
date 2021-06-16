@@ -19,3 +19,6 @@ struct ast *newnum(double d);
 double eval(struct ast *);
 
 void treefree(struct ast *);
+
+extern int yylineno;
+void yyerror(char *s, ...);

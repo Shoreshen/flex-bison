@@ -57,20 +57,29 @@ void treefree(struct ast *a)
     switch(a->nodetype){
         case 'K':
             free(a);
+            return;
         case '+':
         case '-':
         case '*':
         case '/':
             treefree(a->r);
             treefree(a->l);
-            break;
+            return;
         case 'M':
         case '|':
             treefree(a->l);
-            break;
+            return;
         default: 
             printf("internal error: free bad node %c\n", a->nodetype);
     }
+}
+void yyerror(char *s, ...)
+{
+    va_list ap;
+    va_start(ap, s);
+    fprintf(stderr, "%d: error: ", yylineno);
+    vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
 }
 
 int main()
