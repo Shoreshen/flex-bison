@@ -1,6 +1,6 @@
 /* simplest version of calculator */
 %{
-    #include "calc.h"
+    #include "calc2.h"
 %}
 
 /*

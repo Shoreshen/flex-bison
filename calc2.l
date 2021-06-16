@@ -1,8 +1,8 @@
 %option noyywrap
 
 %{
-    #include "calc.h"
-    #include "calc.tab.h"
+    #include "calc2.h"
+    #include "calc2.tab.h"
 %}
 
 EXP ([Ee][-+]?[0-9]+)

@@ -1,4 +1,4 @@
-#include "calc.h"
+#include "calc2.h"
 
 struct ast* newast(char nodetype, struct ast *l, struct ast *r)
 {
