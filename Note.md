@@ -67,3 +67,44 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 9. `^` Matches the beginning of a line as the first character of a regular expression.
 10. `r/s` an `r` but only if it is followed by an `s`.
 11. `r$` an `r`, but only at the end of a line (i.e., just before a newline). Equivalent to `r/\n`
+
+# Bison
+
+## Precedence 
+
+Mechanism to resolve shift/reduce conflict by assigning precedence level to production rules and terminal symbols.
+
+### Defining
+
+By key words `%left`, `%right` or `%precedence` following by a string of terminal symbols to define the level precedence.
+
+With level precedence, the later defined terminal symbols have the higher precedence.
+
+By key words `%nonassoc` following by a string of terminal symbols to define the highest precedence.
+
+### Mechanism
+
+Bison assign terminal symbols with the precedence it is defined, production rules with the precedence of last terminal symbol in right hand side.
+
+When facing a shift/reduce conflict, bison will compare the reduce production rule's precedence with the precedence of next symbol reading in, and do:
+1. If rule's precedence higher than symbol's, then reduce
+2. If symbol's precedence higher than rule's, then shift
+
+## Association
+
+Mechanism to resolve shift/reduce conflict with the same terminal symbol.
+
+### Defining
+
+By keywords `%left` following by a string of terminal symbols to define left association
+
+By keywords `%right` following by a string of terminal symbols to define right association
+
+By keywords `%nonassoc` following by a string of terminal symbols to define no association
+
+### Mechanism
+
+When facing a shift/reduce conflict, with the next symbol is the same as the last terminal symbol in current stack:
+1. If the symbol is left association, reduce
+2. If the symbol is right association, shift
+3. If the symbol has no association, report an error

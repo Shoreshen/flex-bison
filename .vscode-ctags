@@ -1,0 +1,229 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/shore/OneDrive/flex-bison/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/d3a0955b4/
+$(BISON_OUT)	makefile	/^$(BISON_OUT):$(BISON_FILE)$/;"	t
+$(LEX_OUT)	makefile	/^$(LEX_OUT):$(LEX_DEP)$/;"	t
+$(proj).out	makefile	/^$(proj).out:$(GCC_DEP)$/;"	t
+%.c	makefile	/^%.c: %.l$/;"	t
+%.c	makefile	/^%.c: %.y$/;"	t
+ALL_FILES	makefile	/^ALL_FILES	:= $(filter $(proj).%,$(shell ls | grep "^$(proj)\\.[a-z]*$$"))$/;"	m
+All	samples/Makefile	/^All:$/;"	t
+BISON_FILE	makefile	/^BISON_FILE	:= $(filter %.y, $(ALL_FILES))$/;"	m
+BISON_OUT	makefile	/^BISON_OUT	:= $(BISON_OUT_C) $(BISON_OUT_H)$/;"	m
+BISON_OUT_C	makefile	/^BISON_OUT_C	:= $(subst .y,.tab.c,$(BISON_FILE))$/;"	m
+BISON_OUT_H	makefile	/^BISON_OUT_H	:= $(subst .y,.tab.h,$(BISON_FILE)) $/;"	m
+B_exp	samples/fb3-2.h	/^  B_exp,$/;"	e	enum:bifs
+B_exp	samples/purecalc.h	/^  B_exp,$/;"	e	enum:bifs
+B_log	samples/fb3-2.h	/^  B_log,$/;"	e	enum:bifs
+B_log	samples/purecalc.h	/^  B_log,$/;"	e	enum:bifs
+B_print	samples/fb3-2.h	/^  B_print$/;"	e	enum:bifs
+B_print	samples/purecalc.h	/^  B_print$/;"	e	enum:bifs
+B_sqrt	samples/fb3-2.h	/^  B_sqrt = 1,$/;"	e	enum:bifs
+B_sqrt	samples/purecalc.h	/^  B_sqrt = 1,$/;"	e	enum:bifs
+CC	samples/sql/Makefile	/^CC = cc -g$/;"	m
+CFLAGS	makefile	/^CFLAGS		= -g$/;"	m
+CFLAGS	samples/sql/Makefile	/^CFLAGS = -DYYDEBUG=1$/;"	m
+C_FILE	makefile	/^C_FILE		:= $(filter %.c, $(ALL_FILES))$/;"	m
+GCC_DEP	makefile	/^GCC_DEP		:= $(GCC_TRG) $(H_FILE) $(BISON_OUT_H)$/;"	m
+GCC_TRG	makefile	/^GCC_TRG		:= $(BISON_OUT_C) $(LEX_OUT) $(C_FILE) $/;"	m
+H_FILE	makefile	/^H_FILE		:= $(filter %.h, $(ALL_FILES))$/;"	m
+LEX	samples/sql/Makefile	/^LEX = flex$/;"	m
+LEX_DEP	makefile	/^LEX_DEP		:= $(LEX_FILE) $(BISON_OUT_H)$/;"	m
+LEX_FILE	makefile	/^LEX_FILE 	:= $(filter %.l, $(ALL_FILES))$/;"	m
+LEX_OUT	makefile	/^LEX_OUT		:= $(subst .l,.yy.c,$(LEX_FILE))$/;"	m
+LEX_TRG	makefile	/^LEX_TRG		:= $(LEX_FILE)$/;"	m
+NHASH	samples/fb3-2.h	/^#define NHASH /;"	d
+NHASH	samples/purecalc.h	/^#define NHASH /;"	d
+PHONY	makefile	/^PHONY 			= $/;"	m
+PROGRAMS4	samples/sql/Makefile	/^PROGRAMS4 = pmysql$/;"	m
+PROGRAMS8	samples/sql/Makefile	/^PROGRAMS8 = lpmysql$/;"	m
+PROGRAMS9	samples/sql/Makefile	/^PROGRAMS9 = glrmysql$/;"	m
+SOURCES	samples/Makefile	/^SOURCES=README \\$/;"	m
+SQLFILES	samples/Makefile	/^SQLFILES=sql\/Makefile sql\/glrmysql.y sql\/lpmysql.y sql\/pmysql.y \\$/;"	m
+YACC	samples/sql/Makefile	/^YACC = bison$/;"	m
+all	samples/sql/Makefile	/^all:	${PROGRAMS4} ${PROGRAMS8} ${PROGRAMS9}$/;"	t
+ast	calc2.h	/^struct ast {$/;"	s
+ast	samples/fb3-1.h	/^struct ast {$/;"	s
+ast	samples/fb3-2.h	/^struct ast {$/;"	s
+ast	samples/purecalc.h	/^  struct ast *ast;		\/* an AST for  *\/$/;"	m	struct:pcdata	typeref:struct:ast *
+ast	samples/purecalc.h	/^struct ast {$/;"	s
+bifs	samples/fb3-2.h	/^enum bifs {			\/* built-in functions *\/$/;"	g
+bifs	samples/purecalc.h	/^enum bifs {			\/* built-in functions *\/$/;"	g
+callbuiltin	samples/fb3-2funcs.c	/^callbuiltin(struct fncall *f)$/;"	f	typeref:typename:double	file:
+callbuiltin	samples/purecalcfuncs.c	/^callbuiltin(struct pcdata *pp, struct fncall *f)$/;"	f	typeref:typename:double	file:
+calluser	samples/fb3-2funcs.c	/^calluser(struct ufncall *f)$/;"	f	typeref:typename:double	file:
+calluser	samples/purecalcfuncs.c	/^calluser(struct pcdata *pp, struct ufncall *f)$/;"	f	typeref:typename:double	file:
+clean	makefile	/^clean:$/;"	t
+clean	samples/Makefile	/^clean:$/;"	t
+clean	samples/sql/Makefile	/^clean:$/;"	t
+cleansp	makefile	/^cleansp:$/;"	t
+commit	makefile	/^commit: clean$/;"	t
+cond	samples/fb3-2.h	/^  struct ast *cond;		\/* condition *\/$/;"	m	struct:flow	typeref:struct:ast *
+cond	samples/purecalc.h	/^  struct ast *cond;		\/* condition *\/$/;"	m	struct:flow	typeref:struct:ast *
+cppcalc_ctx	samples/cppcalc-ctx.hh	/^  cppcalc_ctx(int r) { assert(r > 0 && r < 10); radix = r; }$/;"	f	class:cppcalc_ctx
+cppcalc_ctx	samples/cppcalc-ctx.hh	/^class cppcalc_ctx {$/;"	c
+debug	samples/fb3-2funcs.c	/^int debug = 0;$/;"	v	typeref:typename:int
+debug	samples/purecalcfuncs.c	/^int debug = 0;$/;"	v	typeref:typename:int
+dodef	samples/fb3-2funcs.c	/^dodef(struct symbol *name, struct symlist *syms, struct ast *func)$/;"	f	typeref:typename:void
+dodef	samples/purecalcfuncs.c	/^dodef(struct pcdata *pp, struct symbol *name, struct symlist *syms, struct ast *func)$/;"	f	typeref:typename:void
+dumpast	samples/fb3-2funcs.c	/^dumpast(struct ast *a, int level)$/;"	f	typeref:typename:void
+dumpast	samples/purecalcfuncs.c	/^dumpast(struct ast *a, int level)$/;"	f	typeref:typename:void
+el	samples/fb3-2.h	/^  struct ast *el;		\/* optional else list *\/$/;"	m	struct:flow	typeref:struct:ast *
+el	samples/purecalc.h	/^  struct ast *el;		\/* optional else list *\/$/;"	m	struct:flow	typeref:struct:ast *
+eval	calc2.c	/^double eval(struct ast *a)$/;"	f	typeref:typename:double
+eval	samples/fb3-1funcs.c	/^eval(struct ast *a)$/;"	f	typeref:typename:double
+eval	samples/fb3-2funcs.c	/^eval(struct ast *a)$/;"	f	typeref:typename:double
+eval	samples/purecalcfuncs.c	/^eval(struct pcdata *pp, struct ast *a)$/;"	f	typeref:typename:double
+flexbison.zip	samples/Makefile	/^flexbison.zip:	${SOURCES}$/;"	t
+flow	samples/fb3-2.h	/^struct flow {$/;"	s
+flow	samples/purecalc.h	/^struct flow {$/;"	s
+fncall	samples/fb3-2.h	/^struct fncall {			\/* built-in function *\/$/;"	s
+fncall	samples/purecalc.h	/^struct fncall {			\/* built-in function *\/$/;"	s
+func	samples/fb3-2.h	/^  struct ast *func;	\/* stmt for the function *\/$/;"	m	struct:symbol	typeref:struct:ast *
+func	samples/purecalc.h	/^  struct ast *func;	\/* stmt for the function *\/$/;"	m	struct:symbol	typeref:struct:ast *
+functype	samples/fb3-2.h	/^  enum bifs functype;$/;"	m	struct:fncall	typeref:enum:bifs
+functype	samples/purecalc.h	/^  enum bifs functype;$/;"	m	struct:fncall	typeref:enum:bifs
+getradix	samples/cppcalc-ctx.hh	/^  inline int getradix(void) { return radix; } \/\/ should be no more than 10$/;"	f	class:cppcalc_ctx	typeref:typename:int
+glrmysql	samples/sql/Makefile	/^glrmysql:	glrmysql.tab.o glrmysql.o$/;"	t
+glrmysql.c	samples/sql/Makefile	/^glrmysql.c:	glrmysql.l$/;"	t
+glrmysql.o	samples/sql/Makefile	/^glrmysql.o:	glrmysql.c glrmysql.tab.h$/;"	t
+glrmysql.tab.c	samples/sql/Makefile	/^glrmysql.tab.c glrmysql.tab.h:	glrmysql.y$/;"	t
+glrmysql.tab.h	samples/sql/Makefile	/^glrmysql.tab.c glrmysql.tab.h:	glrmysql.y$/;"	t
+l	calc2.h	/^    struct ast *l;$/;"	m	struct:ast	typeref:struct:ast *
+l	samples/fb3-1.h	/^  struct ast *l;$/;"	m	struct:ast	typeref:struct:ast *
+l	samples/fb3-2.h	/^  struct ast *l;		\/* list of arguments *\/$/;"	m	struct:ufncall	typeref:struct:ast *
+l	samples/fb3-2.h	/^  struct ast *l;$/;"	m	struct:ast	typeref:struct:ast *
+l	samples/fb3-2.h	/^  struct ast *l;$/;"	m	struct:fncall	typeref:struct:ast *
+l	samples/purecalc.h	/^  struct ast *l;		\/* list of arguments *\/$/;"	m	struct:ufncall	typeref:struct:ast *
+l	samples/purecalc.h	/^  struct ast *l;$/;"	m	struct:ast	typeref:struct:ast *
+l	samples/purecalc.h	/^  struct ast *l;$/;"	m	struct:fncall	typeref:struct:ast *
+lookup	samples/fb3-2funcs.c	/^lookup(char* sym)$/;"	f	typeref:struct:symbol *
+lookup	samples/purecalcfuncs.c	/^lookup(struct pcdata *pp, char* sym)$/;"	f	typeref:struct:symbol *
+lpmysql	samples/sql/Makefile	/^lpmysql:	lpmysql.tab.o lpmysql.o$/;"	t
+lpmysql.c	samples/sql/Makefile	/^lpmysql.c:	lpmysql.l$/;"	t
+lpmysql.o	samples/sql/Makefile	/^lpmysql.o:	lpmysql.c lpmysql.tab.h$/;"	t
+lpmysql.tab.c	samples/sql/Makefile	/^lpmysql.tab.c lpmysql.tab.h:	lpmysql.y$/;"	t
+lpmysql.tab.h	samples/sql/Makefile	/^lpmysql.tab.c lpmysql.tab.h:	lpmysql.y$/;"	t
+main	calc2.c	/^int main()$/;"	f	typeref:typename:int
+main	samples/fb3-1funcs.c	/^main()$/;"	f	typeref:typename:int
+main	samples/fb3-2funcs.c	/^main()$/;"	f	typeref:typename:int
+main	samples/purecalcfuncs.c	/^main()$/;"	f	typeref:typename:int
+name	samples/fb3-2.h	/^  char *name;$/;"	m	struct:symbol	typeref:typename:char *
+name	samples/purecalc.h	/^  char *name;$/;"	m	struct:symbol	typeref:typename:char *
+newasgn	samples/fb3-2funcs.c	/^newasgn(struct symbol *s, struct ast *v)$/;"	f	typeref:struct:ast *
+newasgn	samples/purecalcfuncs.c	/^newasgn(struct pcdata *pp, struct symbol *s, struct ast *v)$/;"	f	typeref:struct:ast *
+newast	calc2.c	/^struct ast* newast(char nodetype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newast	samples/fb3-1funcs.c	/^newast(int nodetype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newast	samples/fb3-2funcs.c	/^newast(int nodetype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newast	samples/purecalcfuncs.c	/^newast(struct pcdata *pp, int nodetype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newcall	samples/fb3-2funcs.c	/^newcall(struct symbol *s, struct ast *l)$/;"	f	typeref:struct:ast *
+newcall	samples/purecalcfuncs.c	/^newcall(struct pcdata *pp, struct symbol *s, struct ast *l)$/;"	f	typeref:struct:ast *
+newcmp	samples/fb3-2funcs.c	/^newcmp(int cmptype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newcmp	samples/purecalcfuncs.c	/^newcmp(struct pcdata *pp, int cmptype, struct ast *l, struct ast *r)$/;"	f	typeref:struct:ast *
+newflow	samples/fb3-2funcs.c	/^newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *el)$/;"	f	typeref:struct:ast *
+newflow	samples/purecalcfuncs.c	/^newflow(struct pcdata *pp, int nodetype, struct ast *cond, struct ast *tl, struct ast *el)$/;"	f	typeref:struct:ast *
+newfunc	samples/fb3-2funcs.c	/^newfunc(int functype, struct ast *l)$/;"	f	typeref:struct:ast *
+newfunc	samples/purecalcfuncs.c	/^newfunc(struct pcdata *pp, int functype, struct ast *l)$/;"	f	typeref:struct:ast *
+newnum	calc2.c	/^struct ast* newnum(double d)$/;"	f	typeref:struct:ast *
+newnum	samples/fb3-1funcs.c	/^newnum(double d)$/;"	f	typeref:struct:ast *
+newnum	samples/fb3-2funcs.c	/^newnum(double d)$/;"	f	typeref:struct:ast *
+newnum	samples/purecalcfuncs.c	/^newnum(struct pcdata *pp, double d)$/;"	f	typeref:struct:ast *
+newref	samples/fb3-2funcs.c	/^newref(struct symbol *s)$/;"	f	typeref:struct:ast *
+newref	samples/purecalcfuncs.c	/^newref(struct pcdata *pp, struct symbol *s)$/;"	f	typeref:struct:ast *
+newsymlist	samples/fb3-2funcs.c	/^newsymlist(struct symbol *sym, struct symlist *next)$/;"	f	typeref:struct:symlist *
+newsymlist	samples/purecalcfuncs.c	/^newsymlist(struct pcdata *pp, struct symbol *sym, struct symlist *next)$/;"	f	typeref:struct:symlist *
+next	samples/fb3-2.h	/^  struct symlist *next;$/;"	m	struct:symlist	typeref:struct:symlist *
+next	samples/purecalc.h	/^  struct symlist *next;$/;"	m	struct:symlist	typeref:struct:symlist *
+nodetype	calc2.h	/^    char nodetype;$/;"	m	struct:ast	typeref:typename:char
+nodetype	calc2.h	/^    char nodetype;$/;"	m	struct:numval	typeref:typename:char
+nodetype	samples/fb3-1.h	/^  int nodetype;			\/* type K *\/$/;"	m	struct:numval	typeref:typename:int
+nodetype	samples/fb3-1.h	/^  int nodetype;$/;"	m	struct:ast	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type = *\/$/;"	m	struct:symasgn	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type C *\/$/;"	m	struct:ufncall	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type F *\/$/;"	m	struct:fncall	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type I or W *\/$/;"	m	struct:flow	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type K *\/$/;"	m	struct:numval	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;			\/* type N *\/$/;"	m	struct:symref	typeref:typename:int
+nodetype	samples/fb3-2.h	/^  int nodetype;$/;"	m	struct:ast	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type = *\/$/;"	m	struct:symasgn	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type C *\/$/;"	m	struct:ufncall	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type F *\/$/;"	m	struct:fncall	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type I or W *\/$/;"	m	struct:flow	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type K *\/$/;"	m	struct:numval	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;			\/* type N *\/$/;"	m	struct:symref	typeref:typename:int
+nodetype	samples/purecalc.h	/^  int nodetype;$/;"	m	struct:ast	typeref:typename:int
+number	calc2.h	/^    double number;$/;"	m	struct:numval	typeref:typename:double
+number	samples/fb3-1.h	/^  double number;$/;"	m	struct:numval	typeref:typename:double
+number	samples/fb3-2.h	/^  double number;$/;"	m	struct:numval	typeref:typename:double
+number	samples/purecalc.h	/^  double number;$/;"	m	struct:numval	typeref:typename:double
+numval	calc2.h	/^struct numval {$/;"	s
+numval	samples/fb3-1.h	/^struct numval {$/;"	s
+numval	samples/fb3-2.h	/^struct numval {$/;"	s
+numval	samples/purecalc.h	/^struct numval {$/;"	s
+pcdata	samples/purecalc.h	/^struct pcdata {$/;"	s
+pmysql	samples/sql/Makefile	/^pmysql:	pmysql.tab.o pmysql.o$/;"	t
+pmysql.c	samples/sql/Makefile	/^pmysql.c:	pmysql.l$/;"	t
+pmysql.o	samples/sql/Makefile	/^pmysql.o:	pmysql.c pmysql.tab.h$/;"	t
+pmysql.tab.c	samples/sql/Makefile	/^pmysql.tab.c pmysql.tab.h:	pmysql.y$/;"	t
+pmysql.tab.h	samples/sql/Makefile	/^pmysql.tab.c pmysql.tab.h:	pmysql.y$/;"	t
+proj	makefile	/^proj 			= $/;"	m
+r	calc2.h	/^    struct ast *r;$/;"	m	struct:ast	typeref:struct:ast *
+r	samples/fb3-1.h	/^  struct ast *r;$/;"	m	struct:ast	typeref:struct:ast *
+r	samples/fb3-2.h	/^  struct ast *r;$/;"	m	struct:ast	typeref:struct:ast *
+r	samples/purecalc.h	/^  struct ast *r;$/;"	m	struct:ast	typeref:struct:ast *
+radix	samples/cppcalc-ctx.hh	/^  int radix;$/;"	m	class:cppcalc_ctx	typeref:typename:int
+run	makefile	/^run:$(proj).out$/;"	t
+run_lex	makefile	/^run_lex:$(proj).out$/;"	t
+s	samples/fb3-2.h	/^  struct symbol *s;$/;"	m	struct:symasgn	typeref:struct:symbol *
+s	samples/fb3-2.h	/^  struct symbol *s;$/;"	m	struct:symref	typeref:struct:symbol *
+s	samples/fb3-2.h	/^  struct symbol *s;$/;"	m	struct:ufncall	typeref:struct:symbol *
+s	samples/purecalc.h	/^  struct symbol *s;$/;"	m	struct:symasgn	typeref:struct:symbol *
+s	samples/purecalc.h	/^  struct symbol *s;$/;"	m	struct:symref	typeref:struct:symbol *
+s	samples/purecalc.h	/^  struct symbol *s;$/;"	m	struct:ufncall	typeref:struct:symbol *
+scaninfo	samples/purecalc.h	/^  yyscan_t scaninfo;		\/* scanner context *\/$/;"	m	struct:pcdata	typeref:typename:yyscan_t
+sym	samples/fb3-2.h	/^  struct symbol *sym;$/;"	m	struct:symlist	typeref:struct:symbol *
+sym	samples/purecalc.h	/^  struct symbol *sym;$/;"	m	struct:symlist	typeref:struct:symbol *
+symasgn	samples/fb3-2.h	/^struct symasgn {$/;"	s
+symasgn	samples/purecalc.h	/^struct symasgn {$/;"	s
+symbol	samples/fb3-2.h	/^struct symbol {		\/* a variable name *\/$/;"	s
+symbol	samples/purecalc.h	/^struct symbol {		\/* a variable name *\/$/;"	s
+symhash	samples/fb3-2funcs.c	/^symhash(char *sym)$/;"	f	typeref:typename:unsigned	file:
+symhash	samples/purecalcfuncs.c	/^symhash(char *sym)$/;"	f	typeref:typename:unsigned	file:
+symlist	samples/fb3-2.h	/^struct symlist {$/;"	s
+symlist	samples/purecalc.h	/^struct symlist {$/;"	s
+symlistfree	samples/fb3-2funcs.c	/^symlistfree(struct symlist *sl)$/;"	f	typeref:typename:void
+symlistfree	samples/purecalcfuncs.c	/^symlistfree(struct pcdata *pp, struct symlist *sl)$/;"	f	typeref:typename:void
+symref	samples/fb3-2.h	/^struct symref {$/;"	s
+symref	samples/purecalc.h	/^struct symref {$/;"	s
+syms	samples/fb3-2.h	/^  struct symlist *syms; \/* list of dummy args *\/$/;"	m	struct:symbol	typeref:struct:symlist *
+syms	samples/purecalc.h	/^  struct symlist *syms; \/* list of dummy args *\/$/;"	m	struct:symbol	typeref:struct:symlist *
+symtab	samples/fb3-2.h	/^struct symbol symtab[NHASH];$/;"	v	typeref:struct:symbol[]
+symtab	samples/purecalc.h	/^  struct symbol *symtab;	\/* symbols for this parse *\/$/;"	m	struct:pcdata	typeref:struct:symbol *
+symtab	samples/purecalc.h	/^struct symbol symtab[NHASH];$/;"	v	typeref:struct:symbol[]
+sync	makefile	/^sync: commit $/;"	t
+test	makefile	/^test:$/;"	t
+tl	samples/fb3-2.h	/^  struct ast *tl;		\/* then or do list *\/$/;"	m	struct:flow	typeref:struct:ast *
+tl	samples/purecalc.h	/^  struct ast *tl;		\/* then or do list *\/$/;"	m	struct:flow	typeref:struct:ast *
+treefree	calc2.c	/^void treefree(struct ast *a)$/;"	f	typeref:typename:void
+treefree	samples/fb3-1funcs.c	/^treefree(struct ast *a)$/;"	f	typeref:typename:void
+treefree	samples/fb3-2funcs.c	/^treefree(struct ast *a)$/;"	f	typeref:typename:void
+treefree	samples/purecalcfuncs.c	/^treefree(struct pcdata *pp, struct ast *a)$/;"	f	typeref:typename:void
+ufncall	samples/fb3-2.h	/^struct ufncall {		\/* user function *\/$/;"	s
+ufncall	samples/purecalc.h	/^struct ufncall {		\/* user function *\/$/;"	s
+v	samples/fb3-2.h	/^  struct ast *v;		\/* value *\/$/;"	m	struct:symasgn	typeref:struct:ast *
+v	samples/purecalc.h	/^  struct ast *v;		\/* value *\/$/;"	m	struct:symasgn	typeref:struct:ast *
+value	samples/fb3-2.h	/^  double value;$/;"	m	struct:symbol	typeref:typename:double
+value	samples/purecalc.h	/^  double value;$/;"	m	struct:symbol	typeref:typename:double
+yyerror	calc2.c	/^void yyerror(char *s, ...)$/;"	f	typeref:typename:void
+yyerror	samples/fb3-1funcs.c	/^yyerror(char *s, ...)$/;"	f	typeref:typename:void
+yyerror	samples/fb3-2funcs.c	/^yyerror(char *s, ...)$/;"	f	typeref:typename:void
+yyerror	samples/purecalcfuncs.c	/^yyerror(struct pcdata *pp, char *s, ...)$/;"	f	typeref:typename:void
+zip	samples/Makefile	/^zip::	flexbison.zip$/;"	t
