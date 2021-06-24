@@ -12,12 +12,18 @@
 %union {
     struct ast *a;
     double d;
+    struct symbol *s;
+    struct symlist *sl;
+    int fn;
 }
 /* declare tokens */
-%token <d> NUMBER 
+%token <d> NUMBER
+%token <s> NAME
+%token <fn> FUNC
 %token EOL
 
-%type <a> exp factor term
+%type <a> exp stmt list explist
+%type <sl> symlist
 
 %%
 
