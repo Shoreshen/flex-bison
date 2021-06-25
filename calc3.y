@@ -137,11 +137,15 @@ symlist:
 calclist: /*nothing*/
       /*stme can be an exp*/
     | calclist stmt EOL{
-        $$ = $1;
+        if(debug) {
+            dumpast($2, 0);
+        }
+        printf("= %4.4g\n> ", eval($2));
+        treefree($2);
     }
       /*Defining function*/
     | calclist LET NAME '(' symlist ')' '=' list EOL {
-        $$ = dodef($3, $5, $8);
+        dodef($3, $5, $8);
         printf("Defined %s\n> ", $3->name);
     }
       /*Error handling, */

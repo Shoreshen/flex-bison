@@ -26,7 +26,7 @@ struct ast* dodef(struct symbol* sym, struct symlist* sl, struct ast* list);
 
 struct symbol symtab[NHASH];
 //==============================================================================================
-// AST
+// AST struct
 //==============================================================================================
 struct ast {
     char nodetype;
@@ -71,3 +71,9 @@ struct symasgn {
     struct ast* v;
 };
 struct ast* newasgn(char nodetype, struct symbol* s, struct ast* v);
+//==============================================================================================
+// AST operation
+//==============================================================================================
+void dumpast(struct ast* a, int level);
+void eval(struct ast* a);
+void treefree(struct ast* a);
