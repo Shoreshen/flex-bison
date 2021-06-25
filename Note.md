@@ -76,11 +76,9 @@ Mechanism to resolve shift/reduce conflict by assigning precedence level to prod
 
 ### Defining
 
-By key words `%left`, `%right` or `%precedence` following by a string of terminal symbols to define the level precedence.
+By key words `%left`, `%right` , `%nonassoc` or `%precedence` following by a string of terminal symbols to define the level precedence.
 
 With level precedence, the later defined terminal symbols have the higher precedence.
-
-By key words `%nonassoc` following by a string of terminal symbols to define the highest precedence.
 
 ### Mechanism
 
@@ -108,3 +106,27 @@ When facing a shift/reduce conflict, with the next symbol is the same as the las
 1. If the symbol is left association, reduce
 2. If the symbol is right association, shift
 3. If the symbol has no association, report an error
+
+## Error handling
+
+Bison always defines token `error` for error handling, rules can be defined with the `error` token to identify and handling errors.
+
+To better illustrate, we use the follow example:
+
+```s
+stmts: /*nothing*/
+   | stmts ’\n’
+   | stmts exp ’\n’
+   | stmts error ’\n’
+;
+```
+
+If bison encountered an error while parsing `exp`, then:
+1. Discard symbols in stack until met `stmts` token
+2. Shift in `error` token
+3. Shift in the next token, if no rules can accept, then discard. In this case, if the next token is not `\n` then discard.
+4. Until a valid rule can accept, in this case until the next token is `\n`, then shift and reduce.
+
+### Macros
+
+1. `yyerrok`: Ignore current error and continue parsing

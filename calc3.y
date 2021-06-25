@@ -16,47 +16,137 @@
     struct symlist *sl;
     int fn;
 }
+
 /* declare tokens */
 %token <d> NUMBER
 %token <s> NAME
 %token <fn> FUNC
-%token EOL
-
 %type <a> exp stmt list explist
 %type <sl> symlist
 
+/*Without type*/
+%token IF THEN ELSE WHILE DO LET EOL
+
+/*specifying start symbol instead of putting it at start*/
+%start calclist
+
+/*
+  Precedence & association, all for exp token
+
+*/
+%nonassoc FUNC CMP
+%right '='
+%left '+' '-'
+%left '*' '/'
+%nonassoc '|' UMINUS
+
 %%
-
-calclist: /* nothing */
-| calclist exp EOL  {
-                        printf("= %4.4g\n", eval($2));
-                        treefree($2); 
-                        printf("> ");
-                    }
-
- | calclist EOL { printf("> "); } /* blank line or a comment */
- ;
  /*
-    The value of target symbol is referenced as $$
-    The value of symbols at right are referecned from $1 to $n, left to right
+  By defualt, bison will shift else rather than reduce;
+  Thus, if stack = IF exp THEN exp, lookahead = ELSE, 
+  bison will shift in ELSE.
  */
-exp: factor
- | exp '+' factor { $$ = newast('+', $1,$3); }
- | exp '-' factor { $$ = newast('-', $1,$3);}
- ;
- /*
-    Literal character token such as '*' is used to match "*"
-    The value type of it by defualt is int
-    The value is the ACSII value of the character
- */
-factor: term
- | factor '*' term { $$ = newast('*', $1,$3); }
- | factor '/' term { $$ = newast('/', $1,$3); }
- ;
+stmt: 
+    IF exp THEN list {
+        $$ = newflow('I', $2, $4, NULL); 
+    }
+    | IF exp THEN list ELSE list {
+        $$ = newflow('I', $2, $4, $6); 
+    }
+    | WHILE exp DO list {
+        $$ = newflow('I', $2, $4, $6); 
+    }
+    | exp /*By defualt $$ = $1*/
+;
 
-term: NUMBER   { $$ = newnum($1); }
- | '|' term    { $$ = newast('|', $2, NULL); }
- | '(' exp ')' { $$ = $2; }
- | '-' term    { $$ = newast('M', $2, NULL); }
- ;
+ /*Defualt shift overcome reduce*/
+list: /* nothing */ { $$ = NULL; } /*No symbol, so no defualt value*/
+    | stmt ';' list {
+        if($3 == NULL){
+            $$ = $1;
+        } else {
+            $$ = newast('L', $1, $3);
+        }
+    }
+;
+
+exp:
+    exp CMP exp {
+        newcmp($2, $1, $3);
+    }
+    | exp '+' exp{
+        $$ = newast('+', $1, $3);
+    }
+    | exp '-' exp{
+        $$ = newast('-', $1, $3);
+    }
+    | exp '*' exp{
+        $$ = newast('*', $1, $3);
+    }
+    | exp '/' exp
+    {
+        $$ = newast('/', $1, $3);
+    }
+    | '|' exp{
+        $$ = newast('|', $1, NULL);
+    }
+    | '(' exp ')'{
+        $$ = $1;
+    }
+    | '-' exp %prec UMINUS{
+        $$ = newast('M', $1, NULL);
+    }
+    | NUMBER {
+        newnum($1);
+    }
+    | NAME {
+        $$ = newref($1); /* 
+                           $1 = NAME has value type of `struct symbol *s`
+                           $$ = exp has value type of `struct ast *s`
+                         */
+    }
+    | NAME '=' exp {
+        $$ = newasgn($1, $3);
+    }
+    | FUNC '(' explist ')' {
+        $$ = newsfunc($1, $3); /*explist is also an ast*/
+    }
+    | NAME '(' explist ')'{
+        $$ = newufunc($1, $3);
+    }
+;
+
+explist: 
+    exp{
+        $$ = $1;
+    }
+    | exp ',' explist{
+        $$ = newast('L', $1, $3);
+    }
+;
+
+symlist: 
+    NAME {
+        $$ = newsymlist($1, NULL);
+    }
+    | NAME ',' symlist{
+        $$ = newsymlist($1, $3);
+    }
+;
+
+calclist: /*nothing*/
+      /*stme can be an exp*/
+    | calclist stmt EOL{
+        $$ = $1;
+    }
+      /*Defining function*/
+    | calclist LET NAME '(' symlist ')' '=' list EOL {
+        $$ = dodef($3, $5, $8);
+        printf("Defined %s\n> ", $3->name);
+    }
+      /*Error handling, */
+    | calclist error EOL {
+        yyerrok; /*Ignore current error and continue*/
+        printf("> "); 
+    }
 %%
