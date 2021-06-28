@@ -2,11 +2,21 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+// Wrapper for flex & bison
 extern int yylineno;
+extern int yyparse();
+extern int yylex();
+// Defining yyerror for bison
 void yyerror(char *s, ...);
-
 //==============================================================================================
-// Symbol
+// Utility
+//==============================================================================================
+#define CHECK_NONULL(a) if(!a){\
+    printf("out of space");\
+    exit(0);\
+}
+//==============================================================================================
+// Symbol structure
 //==============================================================================================
 #define NHASH 9997
 struct symbol{
@@ -15,16 +25,18 @@ struct symbol{
     struct ast *func;
     struct symlist* syms;
 };
-
 struct symlist{
     struct symlist* next;
     struct symbol* sym;
 };
+struct symbol symtab[NHASH];
+//==============================================================================================
+// Symbol operation
+//==============================================================================================
+struct symbol* lookup(char *s);
 struct symlist* newsymlist(struct symbol* s, struct symlist* sl);
 //Defining an function
 struct ast* dodef(struct symbol* sym, struct symlist* sl, struct ast* list);
-
-struct symbol symtab[NHASH];
 //==============================================================================================
 // AST struct
 //==============================================================================================
@@ -33,47 +45,54 @@ struct ast {
     struct ast* l;
     struct ast* r;
 };
-struct ast* newast(char nodetype, struct ast* l, struct ast* r);
-// Comparison also using ast struct
-struct ast* newcmp(char nodetype, struct ast* l, struct ast* r);
+enum sf_type{
+    sf_sqrt = 1,
+    sf_exp,
+    sf_log,
+    sf_print,
+};
 struct sfunc {
     char nodetype; // 'F'
-    int funcType;
+    enum sf_type funcType;
     struct ast* l;
 };
-struct ast* newsfunc(int funcType, struct ast* l);
 struct ufunc {
-    char nodetype;
+    char nodetype; // 'C'
     struct ast* l;
     struct symbol* s;
 };
-struct ast* newufunc(struct symbol* s, struct ast* l);
 struct numval {
     char nodetype; // 'K'
     double number;
 };
-struct ast* newnum(double number);
 struct symref {
-    char nodetype;
+    char nodetype; // 'N'
     struct symbol* sym;
 };
-struct ast* newref(struct symbol *s);
 struct flow {
-    char notetype; // if = 'I'; while = 'W'
+    char nodetype; // if = 'I'; while = 'W'
     struct ast* cond;
     struct ast* tl;
     struct ast* el;
 };
-struct ast* newflow(char nodetype, struct ast* cond, struct ast* tl, struct ast* el);
 struct symasgn {
     char nodetype;
     struct symbol* s;
     struct ast* v;
 };
-struct ast* newasgn(char nodetype, struct symbol* s, struct ast* v);
 //==============================================================================================
 // AST operation
 //==============================================================================================
+// Creating nodes
+struct ast* newast(char nodetype, struct ast* l, struct ast* r);
+struct ast* newnum(double number);
+struct ast* newcmp(char nodetype, struct ast* l, struct ast* r);
+struct ast* newsfunc(int funcType, struct ast* l);
+struct ast* newufunc(struct symbol* s, struct ast* l);
+struct ast* newref(struct symbol *s);
+struct ast* newflow(char nodetype, struct ast* cond, struct ast* tl, struct ast* el);
+struct ast* newasgn(char nodetype, struct symbol* s, struct ast* v);
+//Operations
 void dumpast(struct ast* a, int level);
-void eval(struct ast* a);
+double eval(struct ast* a);
 void treefree(struct ast* a);

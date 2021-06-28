@@ -1,6 +1,6 @@
 /* simplest version of calculator */
 %{
-    #include "calc2.h"
+    #include "calc3.h"
 %}
 
 /*
@@ -32,9 +32,8 @@
 
 /*
   Precedence & association, all for exp token
-
 */
-%nonassoc FUNC CMP
+%nonassoc <fn> CMP // Declearing and defining the type, token together
 %right '='
 %left '+' '-'
 %left '*' '/'
@@ -54,7 +53,7 @@ stmt:
         $$ = newflow('I', $2, $4, $6); 
     }
     | WHILE exp DO list {
-        $$ = newflow('I', $2, $4, $6); 
+        $$ = newflow('W', $2, $4, NULL); 
     }
     | exp /*By defualt $$ = $1*/
 ;
@@ -88,13 +87,13 @@ exp:
         $$ = newast('/', $1, $3);
     }
     | '|' exp{
-        $$ = newast('|', $1, NULL);
+        $$ = newast('|', $2, NULL);
     }
     | '(' exp ')'{
-        $$ = $1;
+        $$ = $2;
     }
     | '-' exp %prec UMINUS{
-        $$ = newast('M', $1, NULL);
+        $$ = newast('M', $2, NULL);
     }
     | NUMBER {
         newnum($1);

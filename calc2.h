@@ -21,4 +21,6 @@ double eval(struct ast *);
 void treefree(struct ast *);
 
 extern int yylineno;
+extern int yyparse();
+extern int yylex();
 void yyerror(char *s, ...);
