@@ -48,7 +48,6 @@ struct ast* newast(char nodetype, struct ast *l, struct ast *r)
     a->nodetype = nodetype;
     return a;
 }
-
 struct ast* newnum(double d)
 {
     struct numval* a = malloc(sizeof(struct numval));
@@ -64,7 +63,7 @@ struct ast* newcmp(char nodetype, struct ast* l, struct ast* r)
 {
     struct ast* a = malloc(sizeof(struct ast));
     CHECK_NONULL(a);
-    a->nodetype = nodetype;
+    a->nodetype = '0' + nodetype;
     a->l = l;
     a->r = r;
     return a;
@@ -116,53 +115,151 @@ struct ast* newasgn(struct symbol* s, struct ast* v)
 }
 #pragma endregion
 
+double sys_func(struct sfunc * a)
+{
+    double tmp = eval(a->l);
+    switch(a->funcType){
+        case 1:
+            return sqrt(tmp);
+        case 2:
+            return exp(tmp);
+        case 3:
+            return log(tmp);
+        case 4:
+            printf("= %4.4g\n", tmp);
+            return tmp;
+        default:
+            yyerror("Unknown built-in function %d", a->funcType);
+            return 0.0;
+    }
+}
+
+double user_func(struct ufunc * a)
+{
+    struct symbol *s = a->s;
+    struct symlist *sl = s->syms;
+    while(sl) {
+        
+    }
+
+}
+
 double eval(struct ast *a)
 {
     double tmp;
     switch(a->nodetype){
         case 'K':
-            return ((struct numval*)a)->number;
+            tmp = ((struct numval*)a)->number;
+            break;
+        case 'N': // No need to free symbol
+            tmp = ((struct symref*)a)->sym->value;
+            break;
         case '+':
-            return eval(a->l) + eval(a->r);
+            tmp = eval(a->l) + evel(a->r);
+            break;
         case '-':
-            return eval(a->l) - eval(a->r);
+            tmp = eval(a->l) - evel(a->r);
+            break;
         case '*':
-            return eval(a->l) * eval(a->r);
+            tmp = eval(a->l) * evel(a->r);
+            break;
         case '/':
-            return eval(a->l) / eval(a->r);
+            tmp = eval(a->l) / evel(a->r);
+            break;
+        case '1':
+            tmp = (double)(eval(a->l) > evel(a->r));
+            break;
+        case '2':
+            tmp = (double)(eval(a->l) < evel(a->r));
+            break;
+        case '3':
+            tmp = (double)(eval(a->l) != evel(a->r));
+            break;
+        case '4':
+            tmp = (double)(eval(a->l) == evel(a->r));
+            break;
+        case '5':
+            tmp = (double)(eval(a->l) >= evel(a->r));
+            break;
+        case '6':
+            tmp = (double)(eval(a->l) <= evel(a->r));
+            break;
         case 'M':
-            return - eval(a->l);
+            tmp = - eval(a->l);
+            break;
         case '|':
             tmp = eval(a->l);
-            if(tmp<0){
-                return -tmp;
+            if(tmp < 0) {
+                tmp = - tmp;
             }
-            return tmp;
+            break;
+        case 'L':
+            eval(a->l);
+            tmp = eval(a->r);
+            break;
+        case 'C':
+            tmp = sys_func((struct sfunc*)a);
+        case 'F': // struct ast* l; at the same position
+        case '=': // struct ast* v; at the same position
+            treefree(a->l);
+            break;
+        case 'I':
+        case 'W':
+            treefree(((struct flow*)a)->cond);
+            if(((struct flow*)a)->el){
+                treefree(((struct flow*)a)->el);
+            }
+            if(((struct flow*)a)->tl){
+                treefree(((struct flow*)a)->tl);
+            }
+            break;
         default: 
             printf("internal error: free bad node %c\n", a->nodetype);
     }
+    return tmp;
 }
 
 void treefree(struct ast *a)
 {
     switch(a->nodetype){
         case 'K':
-            free(a);
-            return;
+        case 'N': // No need to free symbol
+            break;
         case '+':
         case '-':
         case '*':
         case '/':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case 'L': // expression list
             treefree(a->r);
             treefree(a->l);
-            return;
-        case 'M':
-        case '|':
+            break;
+        case 'M': // struct ast
+        case '|': // struct ast
+        case 'C': // struct ast* l; at the same position
+        case 'F': // struct ast* l; at the same position
+        case '=': // struct ast* v; at the same position
             treefree(a->l);
-            return;
+            break;
+        case 'I':
+        case 'W':
+            treefree(((struct flow*)a)->cond);
+            if(((struct flow*)a)->el){
+                treefree(((struct flow*)a)->el);
+            }
+            if(((struct flow*)a)->tl){
+                treefree(((struct flow*)a)->tl);
+            }
+            break;
         default: 
             printf("internal error: free bad node %c\n", a->nodetype);
     }
+    free(a);
 }
 void yyerror(char *s, ...)
 {

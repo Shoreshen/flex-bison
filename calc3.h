@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <math.h>
 
 // Wrapper for flex & bison
 extern int yylineno;
@@ -53,8 +54,8 @@ enum sf_type{
 };
 struct sfunc {
     char nodetype; // 'F'
-    enum sf_type funcType;
     struct ast* l;
+    enum sf_type funcType;
 };
 struct ufunc {
     char nodetype; // 'C'
@@ -76,9 +77,9 @@ struct flow {
     struct ast* el;
 };
 struct symasgn {
-    char nodetype;
-    struct symbol* s;
+    char nodetype; // '='
     struct ast* v;
+    struct symbol* s;
 };
 //==============================================================================================
 // AST operation
@@ -91,7 +92,7 @@ struct ast* newsfunc(int funcType, struct ast* l);
 struct ast* newufunc(struct symbol* s, struct ast* l);
 struct ast* newref(struct symbol *s);
 struct ast* newflow(char nodetype, struct ast* cond, struct ast* tl, struct ast* el);
-struct ast* newasgn(char nodetype, struct symbol* s, struct ast* v);
+struct ast* newasgn(struct symbol* s, struct ast* v);
 //Operations
 void dumpast(struct ast* a, int level);
 double eval(struct ast* a);
