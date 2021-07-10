@@ -1,5 +1,7 @@
 #include "calc3.h"
 
+struct symbol symtab[NHASH];
+
 #pragma region Symbol operations
 unsigned int symhash(char* sym)
 {
@@ -81,7 +83,7 @@ struct ast* newufunc(struct symbol* s, struct ast* l)
 {
     struct ufunc* a = malloc(sizeof(struct ufunc));
     CHECK_NONULL(a);
-    a->nodetype;
+    a->nodetype = 'C';
     a->s = s;
     a->l = l;
     return (struct ast*)a;
@@ -113,8 +115,17 @@ struct ast* newasgn(struct symbol* s, struct ast* v)
     a->v = v;
     return (struct ast*)a;
 }
+struct symlist* newsymlist(struct symbol* s, struct symlist* sl)
+{
+    struct symlist* new_sl = malloc(sizeof(struct symlist));
+    CHECK_NONULL(new_sl);
+    new_sl->sym = s;
+    new_sl->next = sl;
+    return new_sl;
+}
 #pragma endregion
 
+#pragma region Func eval
 double sys_func(struct sfunc * a)
 {
     double tmp = eval(a->l);
@@ -133,16 +144,52 @@ double sys_func(struct sfunc * a)
             return 0.0;
     }
 }
-
 double user_func(struct ufunc * a)
 {
-    struct symbol *s = a->s;
-    struct symlist *sl = s->syms;
-    while(sl) {
-        
+    struct symbol *fn = a->s;
+    struct symlist *param_formal = fn->syms;
+    struct ast* param_actual = a->l;
+    int arg_num = 0, i;
+    double *tmp, v;
+
+    while(param_formal){
+        arg_num++;
+        param_formal = param_formal->next;
     }
 
+    tmp = malloc(arg_num * sizeof(double));
+    param_formal = fn->syms;
+
+    for(i = 0; i < arg_num; i++){
+        if(!param_actual){
+            yyerror("Too few args in call to %s", fn->name);
+            free(tmp);
+            return 0;
+        }
+        if(param_actual->nodetype == 'L'){
+            v = eval(param_actual->l);
+            param_actual = param_actual->r;
+        }else{
+            v = eval(param_actual);
+            param_actual = NULL;
+        }
+        tmp[i] =  param_formal->sym->value;
+        param_formal->sym->value = v;
+        param_formal = param_formal->next;
+    }
+
+    v = eval(fn->func);
+    
+    param_formal = fn->syms;
+
+    for(i = 0; i < arg_num; i++){
+        param_formal->sym->value = tmp[i];
+        param_formal = param_formal->next;
+    }
+
+    return v;
 }
+#pragma endregion
 
 double eval(struct ast *a)
 {
@@ -155,34 +202,34 @@ double eval(struct ast *a)
             tmp = ((struct symref*)a)->sym->value;
             break;
         case '+':
-            tmp = eval(a->l) + evel(a->r);
+            tmp = eval(a->l) + eval(a->r);
             break;
         case '-':
-            tmp = eval(a->l) - evel(a->r);
+            tmp = eval(a->l) - eval(a->r);
             break;
         case '*':
-            tmp = eval(a->l) * evel(a->r);
+            tmp = eval(a->l) * eval(a->r);
             break;
         case '/':
-            tmp = eval(a->l) / evel(a->r);
+            tmp = eval(a->l) / eval(a->r);
             break;
         case '1':
-            tmp = (double)(eval(a->l) > evel(a->r));
+            tmp = (double)(eval(a->l) > eval(a->r));
             break;
         case '2':
-            tmp = (double)(eval(a->l) < evel(a->r));
+            tmp = (double)(eval(a->l) < eval(a->r));
             break;
         case '3':
-            tmp = (double)(eval(a->l) != evel(a->r));
+            tmp = (double)(eval(a->l) != eval(a->r));
             break;
         case '4':
-            tmp = (double)(eval(a->l) == evel(a->r));
+            tmp = (double)(eval(a->l) == eval(a->r));
             break;
         case '5':
-            tmp = (double)(eval(a->l) >= evel(a->r));
+            tmp = (double)(eval(a->l) >= eval(a->r));
             break;
         case '6':
-            tmp = (double)(eval(a->l) <= evel(a->r));
+            tmp = (double)(eval(a->l) <= eval(a->r));
             break;
         case 'M':
             tmp = - eval(a->l);
@@ -198,19 +245,35 @@ double eval(struct ast *a)
             tmp = eval(a->r);
             break;
         case 'C':
-            tmp = sys_func((struct sfunc*)a);
+            tmp = user_func((struct ufunc*)a);
+            break;
         case 'F': // struct ast* l; at the same position
+            tmp = sys_func((struct sfunc*)a);
+            break;
         case '=': // struct ast* v; at the same position
-            treefree(a->l);
+            tmp = eval(((struct symasgn*)a)->v);
+            ((struct symasgn*)a)->s->value = tmp;
             break;
         case 'I':
-        case 'W':
-            treefree(((struct flow*)a)->cond);
-            if(((struct flow*)a)->el){
-                treefree(((struct flow*)a)->el);
+            if(eval(((struct flow*)a)->cond) != 0){
+                if(((struct flow*)a)->tl){
+                    tmp = eval(((struct flow*)a)->tl);
+                } else {
+                    tmp = 0;
+                }
+            } else {
+                if(((struct flow*)a)->el){
+                    tmp = eval(((struct flow*)a)->el);
+                } else {
+                    tmp = 0;
+                }
             }
+            break;
+        case 'W':
             if(((struct flow*)a)->tl){
-                treefree(((struct flow*)a)->tl);
+                while(eval(((struct flow*)a)->cond) != 0) {
+                    tmp = eval(((struct flow*)a)->tl);
+                }
             }
             break;
         default: 
@@ -219,7 +282,7 @@ double eval(struct ast *a)
     return tmp;
 }
 
-void treefree(struct ast *a)
+void treefree(struct ast* a)
 {
     switch(a->nodetype){
         case 'K':
@@ -261,6 +324,18 @@ void treefree(struct ast *a)
     }
     free(a);
 }
+
+void symlistfree(struct symlist *sl)
+{
+    struct symlist *nsl;
+
+    while(sl) {
+        nsl = sl->next;
+        free(sl);
+        sl = nsl;
+    }
+}
+
 void yyerror(char *s, ...)
 {
     va_list ap;
@@ -270,8 +345,21 @@ void yyerror(char *s, ...)
     fprintf(stderr, "\n");
 }
 
+void dodef(struct symbol* fn, struct symlist* sl, struct ast* list)
+{
+    if(fn->syms){
+
+    }
+    if(fn->func){
+        treefree(fn->func);
+    }
+    fn->syms = sl;
+    fn->func = list;
+}
+
 int main()
 {
+    memset(&symtab[0], 0, sizeof(symtab));
     printf("> ");
     return yyparse();
 }

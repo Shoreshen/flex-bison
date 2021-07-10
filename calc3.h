@@ -1,6 +1,8 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <math.h>
 
 // Wrapper for flex & bison
@@ -26,18 +28,12 @@ struct symbol{
     struct ast *func;
     struct symlist* syms;
 };
-struct symlist{
-    struct symlist* next;
-    struct symbol* sym;
-};
-struct symbol symtab[NHASH];
 //==============================================================================================
 // Symbol operation
 //==============================================================================================
 struct symbol* lookup(char *s);
-struct symlist* newsymlist(struct symbol* s, struct symlist* sl);
-//Defining an function
-struct ast* dodef(struct symbol* sym, struct symlist* sl, struct ast* list);
+void dodef(struct symbol* fn, struct symlist* sl, struct ast* list);
+void symlistfree(struct symlist *sl);
 //==============================================================================================
 // AST struct
 //==============================================================================================
@@ -81,6 +77,10 @@ struct symasgn {
     struct ast* v;
     struct symbol* s;
 };
+struct symlist{
+    struct symbol* sym;
+    struct symlist* next;
+};
 //==============================================================================================
 // AST operation
 //==============================================================================================
@@ -93,6 +93,7 @@ struct ast* newufunc(struct symbol* s, struct ast* l);
 struct ast* newref(struct symbol *s);
 struct ast* newflow(char nodetype, struct ast* cond, struct ast* tl, struct ast* el);
 struct ast* newasgn(struct symbol* s, struct ast* v);
+struct symlist* newsymlist(struct symbol* s, struct symlist* sl);
 //Operations
 void dumpast(struct ast* a, int level);
 double eval(struct ast* a);

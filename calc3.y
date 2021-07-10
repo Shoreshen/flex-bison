@@ -136,9 +136,6 @@ symlist:
 calclist: /*nothing*/
       /*stme can be an exp*/
     | calclist stmt EOL{
-        if(debug) {
-            dumpast($2, 0);
-        }
         printf("= %4.4g\n> ", eval($2));
         treefree($2);
     }

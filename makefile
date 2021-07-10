@@ -25,7 +25,7 @@ GCC_TRG		:= $(BISON_OUT_C) $(LEX_OUT) $(C_FILE)
 GCC_DEP		:= $(GCC_TRG) $(H_FILE) $(BISON_OUT_H)
 
 
-CFLAGS		= -g
+CFLAGS		= -g -lm
 test:
 	@echo $(proj)
 	@echo $(ALL_FILES)

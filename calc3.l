@@ -65,7 +65,7 @@ EXP ([Ee][-+]?[0-9]+)
    should be after keywords, so let flex prefering the pattern appear first
  */
 [a-zA-Z][a-zA-Z0-9] {
-    lookup(yytext); /*
+    yylval.s = lookup(yytext); /*
                       Implicity definition char* yytext
                       Pointing at the string just identified
                     */
