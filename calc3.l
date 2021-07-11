@@ -55,16 +55,28 @@ EXP ([Ee][-+]?[0-9]+)
 "let"   {return LET;}
 
  /*System func*/
-"sqrt" {return sf_sqrt;}
-"exp" {return sf_exp;}
-"log" {return sf_log;}
-"print" {return sf_print;}
+"sqrt" {
+    yylval.fn = sf_sqrt;
+    return FUNC;
+}
+"exp" {
+    yylval.fn = sf_exp;
+    return FUNC;
+}
+"log" {
+    yylval.fn = sf_log;
+    return FUNC;
+}
+"print" {
+    yylval.fn = sf_print;
+    return FUNC;
+}
 
  /*
    names
    should be after keywords, so let flex prefering the pattern appear first
  */
-[a-zA-Z][a-zA-Z0-9] {
+[a-zA-Z][a-zA-Z0-9]* {
     yylval.s = lookup(yytext); /*
                       Implicity definition char* yytext
                       Pointing at the string just identified

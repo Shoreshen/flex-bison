@@ -53,10 +53,7 @@ struct ast* newast(char nodetype, struct ast *l, struct ast *r)
 struct ast* newnum(double d)
 {
     struct numval* a = malloc(sizeof(struct numval));
-    if(!a){
-        printf("out of space");
-        exit(0);
-    }
+    CHECK_NONULL(a);
     a->nodetype = 'K';
     a->number = d;
     return (struct ast*)a;

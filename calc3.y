@@ -71,7 +71,7 @@ list: /* nothing */ { $$ = NULL; } /*No symbol, so no defualt value*/
 
 exp:
     exp CMP exp {
-        newcmp($2, $1, $3);
+        $$ = newcmp($2, $1, $3);
     }
     | exp '+' exp{
         $$ = newast('+', $1, $3);
@@ -96,7 +96,7 @@ exp:
         $$ = newast('M', $2, NULL);
     }
     | NUMBER {
-        newnum($1);
+        $$ = newnum($1);
     }
     | NAME {
         $$ = newref($1); /* 
