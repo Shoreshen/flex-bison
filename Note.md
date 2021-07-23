@@ -53,14 +53,18 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 1. Quotes tell flex to match the exact strings rather than regular expressions.
    1. e.g.:`"+"` means match once a `+` is found in the source code
 2. `[]` character class, matches any character within the brackets
-   1. `^` match any character except the ones in the brackets.
-   2. `-` represent character range based on the ACSII convention, e.g. `[0-9]` means ACSII that is greater than 48('0') and smaller than 57('9')
+   1. <a id=neg_class></a>`^` as the first character to indicate a "negated character class", match any character except the ones in the brackets;
+      e.g. `[^09]` means match any character except `0` and `9`
+   2. `-` represent character range based on the ACSII convention
+      e.g. `[0-9]` means ACSII that is greater than 48('0') and smaller than 57('9')
 3. `{}` 3 functions:
    1. Indicating range of number of times a character continually appears, e.g. `A{1,4}` means accept `A`, `AA`, `AAA`
    2. Indicating exact number of times a character continually appears, e.g. `A{4}` means accept `AAAA`
    3. referring to a named pattern
 4. `.*` ignore the rest of the current line (not including `\n`)
 5. `.` Matches any single character except the newline character (`\n`)
+   1. Note in [negated character class](#neg_class), it simply means character "."
+      e.g. `[^.]` means match any character except `.`
 6. `?` Matches zero or one occurrence of the preceding regular expression, e.g. `-?[0-9]+` matches a signed number including an optional leading minus sign
 7. `/` Matches character with specified following characters, e.g. `0/1` will match `0` within the text of `01`, but not `02`
 8. `()` Groups a series of regular expressions together into a new regular expression, e.g. `([0-9]+)?` matches empty or an integer digit
