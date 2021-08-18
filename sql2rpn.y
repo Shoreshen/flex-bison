@@ -799,9 +799,100 @@ table_subquery:
 opt_as: /*nil*/
     | AS
 ;
-index_hint:
+index_hint: /*nil*/
+    | USE KEY opt_for_join '(' index_list ')' {
+        emit("INDEXHINT %d %d", $5, 10 + $3);
+    }
+    | IGNORE KEY opt_for_join {
+        emit("INDEXHINT %d %d", $5, 20 + $3);
+    }
+    | IGNORE KEY opt_for_join {
+        emit("INDEXHINT %d %d", $5, 30 + $3);
+    }
+;
+opt_for_join:
+    /*nil*/ {
+        $$ = 0;
+    }
+    | FOR JOIN {
+        $$ = 1;
+    }
+;
+index_list:
+    NAME {
+        emit("INDEX %s", $1);
+        free($1);
+    }
+    | index_list ',' NAME {
+        emit("INDEX %s", $3);
+        free($3);
+    }
 ;
 join_table:
+    table_reference opt_inner_cross JOIN table_factor opt_join_condition {
+        emit("JOIN %d", 100 + $2);
+    }
+    | table_reference STRAIGHT_JOIN JOIN table_factor {
+        emit("JOIN %d", 200);
+    }
+    | table_reference STRAIGHT_JOIN JOIN table_factor ON expr {
+        emit("JOIN %d", 200);
+    }
+    | table_reference left_or_right opt_outer JOIN table_factor join_condition {
+        emit("JOIN %d", 300 + $2 + $3);
+    }
+    | table_reference NATURAL opt_left_or_right_outer JOIN JOIN table_factor {
+        emit("JOIN %d", 400 + $3);
+    }
+;
+opt_inner_cross:
+    /*nil*/ {
+        $$ = 0;
+    }
+    | INNER {
+        $$ = 1;
+    }
+    | CROSS {
+        $$ = 2;
+    }
+;
+opt_join_condition: /*nil*/
+    | join_condition;
+;
+join_condition:
+    ON expr {
+        emit("ONEXPR");
+    }
+    | USING '(' column_list ')' {
+        emit("USING %d", $3);
+    }
+;
+left_or_right:
+    LEFT {
+        $$ = 1;
+    }
+    | RIGHT {
+        $$ = 2
+    }
+;
+opt_outer:
+    /*nil*/ {
+        $$ = 0;
+    }
+    | OUTER {
+        $$ = 4;
+    }
+;
+opt_left_or_right_outer: 
+    /*nil*/ {
+        $$ = 0;
+    }
+    | LEFT opt_outer {
+        $$ = 1 + $2;
+    }
+    | RIGHT opt_outer {
+        $$ = 2 + $2;
+    }
 ;
 delete_stmt:
 ;
