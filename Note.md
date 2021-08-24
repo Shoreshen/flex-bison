@@ -102,7 +102,7 @@ By keywords `%left` following by a string of terminal symbols to define left ass
 
 By keywords `%right` following by a string of terminal symbols to define right association
 
-By keywords `%nonassoc` following by a string of terminal symbols to define no association
+By keywords `%nonassoc` following by a string of terminal symbols to define no non-associative symbol, which means that `x op y op z` is considered a syntax error, where `op` is the non-associative symbol.
 
 ### Mechanism
 

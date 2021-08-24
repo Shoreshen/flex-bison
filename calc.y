@@ -2,12 +2,20 @@
 %{
 #include <stdio.h>
 %}
+
+//union of types
+%union {
+    int intval;
+}
+
 /* declare tokens */
 %token NUMBER
 %token ADD SUB MUL DIV ABS
 %token EOL
 %token OP CP
 %token HEX
+// declear type for non-terminal symbols
+%type <intval> exp factor term
 
 %%
 //Start symbol is left side of the first rule

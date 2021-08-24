@@ -618,7 +618,7 @@ select_stmt:
     }
     | SELECT select_opts select_expr_list FROM table_references
     opt_where opt_groupby opt_having opt_orderby opt_limit
-    opt_into_list { 
+    opt_into { 
         emit("SELECT %d %d %d", $2, $3, $5); 
     } 
 ;
@@ -747,7 +747,7 @@ opt_limit:
         emit("LIMIT 2");
     }
 ;
-opt_into_list:
+opt_into: /*nil*/
     | INTO 
 ; 
 column_list:
@@ -895,16 +895,275 @@ opt_left_or_right_outer:
     }
 ;
 delete_stmt:
+    DELETE delete_opts 
+    FROM NAME 
+    opt_where opt_orderby opt_limit {
+        emit("DELETE %d %s", $2, $4);
+        free($4);
+    }
+    | DELETE delete_opts delete_list 
+    FROM table_references 
+    opt_where {
+        emit("DELETEMULTI %d %d %d", $2, $3, $5);
+    }
+    | DELETE delete_opts 
+    USING table_references 
+    opt_where {
+        emit("DELETEMULTI %d %d %d", $2, $4, $6);
+    }
+;
+delete_opts: 
+    /*nil*/ {
+        $$ = 0;
+    }
+    | delete_opts LOW_PRIORITY {
+        $$ = $1 | 1;
+    }
+    | delete_opts QUICK {
+        $$ = $1 | 1 << 1;
+    }
+    | delete_opts IGNORE {
+        $$ = $1 | 1 << 2;
+    }
+;
+delete_list:
+    NAME opt_dot_star {
+        emit("TABLE %s", $1);
+        free($1);
+        $$ = 1;
+    }
+    | delete_list ',' NAME opt_dot_star {
+        emit("TABLE %s", $3);
+        free($3);
+        $$ = $1 + 1;
+    }
+;
+opt_dot_star:/*nil*/
+    | '.' '*'
 ;
 insert_stmt:
+    INSERT insert_opts opt_into NAME 
+    opt_col_names
+    VALUES insert_vals_list 
+    opt_ondupupdate {
+        emit("INSERTVALS %d %d %s", $2, $7, $4);
+        free($4);
+    }
+    | INSERT insert_opts opt_into NAME
+    SET insert_asgn_list
+    opt_ondupupdate {
+        emit("INSERTASGN %d %d %s", $2, $6, $4);
+        free($4);
+    }
+    | INSERT insert_opts opt_into NAME opt_col_names
+    select_stmt
+    opt_ondupupdate {
+        emit("INSERTSELECT %d %s", $2, $4);
+        free($4);
+    }
+;
+insert_opts: 
+    /*nil*/ {
+        $$ = 0;
+    }
+    |insert_opts LOW_PRIORITY {
+        $$ = $1 | 1;
+    }
+    |insert_opts DELAYED {
+        $$ = $1 | 1<<1;
+    }
+    |insert_opts HIGH_PRIORITY {
+        $$ = $1 | 1<<2;
+    }
+    |insert_opts IGNORE {
+        $$ = $1 | 1<<1 | 1<<3;
+    }
+;
+opt_col_names: /*nil*/
+    | '(' column_list ')' {
+        emit("INSERTCOLS %d", $2);
+    }
+;
+insert_vals_list:
+    '(' insert_vals ')' {
+        emit("VALUES %d", $2);
+        $$ = 1;
+    }
+    | insert_vals_list ',' '(' insert_vals ')' {
+        emit("VALUES %d", $4);
+        $$ = $1 + 1;
+    }
+;
+insert_vals:
+    expr {
+        $$ = 1;
+    }
+    | DEFAULT {
+        emit("DEFUALT");
+        $$ = $1;
+    }
+    | insert_vals ',' expr {
+        $$ = $1 + 1;
+    }
+    | insert_vals ',' DEFAULT {
+        $$ = $1 + 1;
+    }
+;
+opt_ondupupdate: /*nil*/
+    | ONDUPLICATE KEY UPDATE insert_asgn_list {
+        emit("DUPUPDATE %d", $4);
+    }
+;
+insert_asgn_list:
+    NAME COMPARISON expr {
+        if ($2 != 4){
+            yyerror("bad insert assignment to %s", $1);
+        }
+        emit("ASSIGN %s", $1);
+        free($1);
+        $$ = 1;
+    }
+    | NAME COMPARISON DEFAULT {
+        if ($2 != 4) {
+            yyerror("bad insert assignment to %s", $1);
+        }
+        emit("DEFAULT"); 
+        emit("ASSIGN %s", $1); 
+        free($1); 
+        $$ = 1; 
+    }
+    | insert_asgn_list ',' NAME COMPARISON expr {
+        if ($4 != 4){
+            yyerror("bad insert assignment to %s", $3);
+        }
+        emit("ASSIGN %s", $3);
+        free($3);
+        $$ = $1
+    }
+    | insert_asgn_list ',' NAME COMPARISON DEFAULT {
+        if ($4 != 4) {
+            yyerror("bad insert assignment to %s", $3);
+        }
+        emit("DEFAULT"); 
+        emit("ASSIGN %s", $3); 
+        free($3); 
+        $$ = $1; 
+    }
 ;
 replace_stmt:
+    REPLACE insert_opts opt_into NAME
+    opt_col_names
+    VALUES insert_vals_list
+    opt_ondupupdate {
+        emit("REPLACEVALS %d %d %s", $2, $7, $4);
+        free($4)
+    }
+    | REPLACE insert_opts opt_into NAME
+    SET insert_asgn_list
+    opt_ondupupdate {
+        emit("REPLACEASGN %d %d %s", $2, $6, $4);
+        free($4);
+    }
+    | REPLACE insert_opts opt_into NAME opt_col_names
+    select_stmt
+    opt_ondupupdate { 
+        emit("REPLACESELECT %d %s", $2, $4); 
+        free($4); 
+    }
 ;
 update_stmt:
+    UPDATE update_opts table_references
+    SET update_asgn_list
+    opt_where
+    opt_orderby
+    opt_limit { 
+        emit("UPDATE %d %d %d", $2, $3, $5); 
+    }
+    | 
+;
+update_opts: 
+    /*nil*/ {
+        $$ = 0;
+    }
+    | insert_opts LOW_PRIORITY {
+        
+    }
+    | insert_opts IGNORE { 
+        $$ = $1 | 1<<1 | 1<<3;
+    }
+;
+update_asgn_list:
+    NAME COMPARISON expr {
+        // Only for comparison of `=`
+        if ($2 != 4) {
+            yyerror("bad insert assignment to %s", $1);
+        }
+	    emit("ASSIGN %s", $1); 
+        free($1); 
+        $$ = 1;
+    }
+    | NAME '.' NAME COMPARISON expr {
+        if ($2 != 4) {
+            yyerror("bad insert assignment to %s.%s", $1, $3);
+        }
+	    emit("ASSIGN %s.%s", $1, $3); 
+        free($1); 
+        free($3);
+        $$ = 1;
+    }
+    | update_asgn_list ',' NAME COMPARISON expr {
+        if ($4 != 4) {
+            yyerror("bad insert assignment to %s", $3);
+        }
+	    emit("ASSIGN %s", $3); 
+        free($3); 
+        $$ = $1 + 1;
+    }
+    | update_asgn_list ',' NAME '.' NAME COMPARISON expr {
+        if ($2 != 4) {
+            yyerror("bad insert assignment to %s.%s", $3, $5);
+        }
+	    emit("ASSIGN %s.%s", $3, $5); 
+        free($3); 
+        free($5); 
+        $$ = $1 + 1;
+    }
 ;
 create_database_stmt:
+    CREATE DATABASE opt_if_not_exists NAME {
+        emit("CREATEDATABASE %d %s", $3, $4);
+        free($4);
+    }
+    | CREATE SCHEMA opt_if_not_exists NAME {
+        emit("CREATEDATABASE %d %s", $3, $4);
+        free($4);
+    }
 ;
-set_stmt:
+opt_if_not_exists: 
+    /*nil*/ {
+        $$ = 0;
+    }
+    | IF EXISTS {
+        if ($2) {
+            yyerror("IF EXISTS doesn't exist"); 
+        }
+        $$ = $2;
+    }
+;
+set_stmt: SET set_list;
+set_list: set_expr | set_list ',' set_expr;
+set_expr:
+    USERVAR COMPARISON expr {
+        if ($2 != 4) {
+            yyerror("bad set to @%s", $1);
+        }
+        emit("SET %s", $1);
+        free($1);
+    }
+    | USERVAR ASSIGN expr {
+        emit("SET %s", $1);
+        free($1);
+    }
 ;
 create_table_stmt:
 ;
