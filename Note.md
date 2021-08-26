@@ -74,6 +74,25 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 
 # Bison
 
+## Mid rule action
+
+Mid rule action refers to the `{c codes}` lies in the mid of the gramma, for example:
+
+```c
+exp: { a(); } "b" { c(); } { d(); } "e" { f(); };
+```
+
+It will be translated as follow:
+
+```c
+exp: $@1 "b" $@2 $@3 "e" { f(); };
+$@1:%empty { a(); };
+$@2:%empty { b(); };
+$@3:%empty { c(); };
+```
+
+With the creation of new non-terminal symbol `$@1`, `$@2`, and `$@3`, bison would trigger the function when they are reduced.
+
 ## Precedence 
 
 Mechanism to resolve shift/reduce conflict by assigning precedence level to production rules and terminal symbols.

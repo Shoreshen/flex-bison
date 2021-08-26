@@ -1,8 +1,5 @@
 %{
-    #include <stdlib.h>
-    #include <stdarg.h>
-    #include <string.h>
-    #include <stdio.h>
+    #include "sql2rpn.h"
 
     void yyerror(char* s,...);
     void emit(char* s,...);   
@@ -13,6 +10,7 @@
     double floatval;
     char* strval;
     int subtok;
+    struct IenLttr* intlen;
 }
 
 %start stmt_list
@@ -43,8 +41,9 @@
 %type <intval> delete_opts delete_list
 %type <intval> insert_opts insert_vals insert_vals_list
 %type <intval> insert_asgn_list opt_if_not_exists update_opts update_asgn_list
-%type <intval> opt_temporary opt_length opt_binary opt_uz enum_list
+%type <intval> opt_temporary opt_binary opt_uz enum_list
 %type <intval> column_atts data_type opt_ignore_replace create_col_list
+%type <intlen> opt_length
 
  /*operator, precedence & association*/
 %right ASSIGN
@@ -576,7 +575,7 @@ val_list:
 ;
 
 opt_val_list: 
-    {
+    %empty {
         $$ = 0;
     }
     | val_list {
@@ -624,7 +623,7 @@ select_stmt:
 ;
 
 select_opts:
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | select_opts ALL {
@@ -689,19 +688,21 @@ select_expr_list:
     }
 ;
 select_expr: expr opt_as_alias;
-opt_as_alias: /*nil*/
+opt_as_alias: %empty
     | AS NAME {
         emit("ALIAS %s", $2);
         free($2);
     }
     | NAME
 ;
-opt_where:
+opt_where: 
+    %empty
     | WHERE expr{
         emit("WHERE");
     }
 ;
 opt_groupby:
+    %empty
     | GROUP BY groupby_list opt_with_rollup {
         emit("GROUPBYLIST %d, %d", $3, $4);
     }
@@ -716,7 +717,10 @@ groupby_list:
         $$ = $1 + 1;
     }
 ;
-opt_asc_desc: { $$ = 0; }
+opt_asc_desc: 
+    %empty { 
+        $$ = 0; 
+    }
     | ASC {
         $$ = 0;
     }
@@ -724,22 +728,28 @@ opt_asc_desc: { $$ = 0; }
         $$ = 1;
     }
 ;
-opt_with_rollup:{ $$ = 0; }
+opt_with_rollup:
+    %empty { 
+        $$ = 0; 
+    }
     | WITH ROLLUP {
         $$ = 1;
     }
 ;
-opt_having:
+opt_having: 
+    %empty
     | HAVING expr {
         emit("HAVING");
     }
 ;
-opt_orderby:
+opt_orderby: 
+    %empty
     | ORDER BY groupby_list {
         emit("ORDERBY %d", $3);
     }
 ;
-opt_limit:
+opt_limit: 
+    %empty
     | LIMIT expr {
         emit("LIMIT 1");
     }
@@ -747,7 +757,8 @@ opt_limit:
         emit("LIMIT 2");
     }
 ;
-opt_into: /*nil*/
+opt_into: 
+    %empty
     | INTO 
 ; 
 column_list:
@@ -796,22 +807,22 @@ table_subquery:
         emit("SUBQUERY");
     }
 ;
-opt_as: /*nil*/
+opt_as: %empty
     | AS
 ;
-index_hint: /*nil*/
+index_hint: %empty
     | USE KEY opt_for_join '(' index_list ')' {
         emit("INDEXHINT %d %d", $5, 10 + $3);
     }
-    | IGNORE KEY opt_for_join {
+    | IGNORE KEY opt_for_join '(' index_list ')' {
         emit("INDEXHINT %d %d", $5, 20 + $3);
     }
-    | IGNORE KEY opt_for_join {
+    | IGNORE KEY opt_for_join '(' index_list ')' {
         emit("INDEXHINT %d %d", $5, 30 + $3);
     }
 ;
 opt_for_join:
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | FOR JOIN {
@@ -822,10 +833,12 @@ index_list:
     NAME {
         emit("INDEX %s", $1);
         free($1);
+        $$ = 1;
     }
     | index_list ',' NAME {
         emit("INDEX %s", $3);
         free($3);
+        $$ = $1 + 1;
     }
 ;
 join_table:
@@ -846,7 +859,7 @@ join_table:
     }
 ;
 opt_inner_cross:
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | INNER {
@@ -856,7 +869,7 @@ opt_inner_cross:
         $$ = 2;
     }
 ;
-opt_join_condition: /*nil*/
+opt_join_condition: %empty
     | join_condition;
 ;
 join_condition:
@@ -872,11 +885,11 @@ left_or_right:
         $$ = 1;
     }
     | RIGHT {
-        $$ = 2
+        $$ = 2;
     }
 ;
 opt_outer:
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | OUTER {
@@ -884,7 +897,7 @@ opt_outer:
     }
 ;
 opt_left_or_right_outer: 
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | LEFT opt_outer {
@@ -907,13 +920,14 @@ delete_stmt:
         emit("DELETEMULTI %d %d %d", $2, $3, $5);
     }
     | DELETE delete_opts 
+    FROM delete_list
     USING table_references 
     opt_where {
         emit("DELETEMULTI %d %d %d", $2, $4, $6);
     }
 ;
 delete_opts: 
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | delete_opts LOW_PRIORITY {
@@ -938,7 +952,7 @@ delete_list:
         $$ = $1 + 1;
     }
 ;
-opt_dot_star:/*nil*/
+opt_dot_star:%empty
     | '.' '*'
 ;
 insert_stmt:
@@ -963,7 +977,7 @@ insert_stmt:
     }
 ;
 insert_opts: 
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     |insert_opts LOW_PRIORITY {
@@ -979,7 +993,7 @@ insert_opts:
         $$ = $1 | 1<<1 | 1<<3;
     }
 ;
-opt_col_names: /*nil*/
+opt_col_names: %empty
     | '(' column_list ')' {
         emit("INSERTCOLS %d", $2);
     }
@@ -1000,7 +1014,7 @@ insert_vals:
     }
     | DEFAULT {
         emit("DEFUALT");
-        $$ = $1;
+        $$ = 1;
     }
     | insert_vals ',' expr {
         $$ = $1 + 1;
@@ -1009,7 +1023,7 @@ insert_vals:
         $$ = $1 + 1;
     }
 ;
-opt_ondupupdate: /*nil*/
+opt_ondupupdate: %empty
     | ONDUPLICATE KEY UPDATE insert_asgn_list {
         emit("DUPUPDATE %d", $4);
     }
@@ -1038,7 +1052,7 @@ insert_asgn_list:
         }
         emit("ASSIGN %s", $3);
         free($3);
-        $$ = $1
+        $$ = $1;
     }
     | insert_asgn_list ',' NAME COMPARISON DEFAULT {
         if ($4 != 4) {
@@ -1056,7 +1070,7 @@ replace_stmt:
     VALUES insert_vals_list
     opt_ondupupdate {
         emit("REPLACEVALS %d %d %s", $2, $7, $4);
-        free($4)
+        free($4);
     }
     | REPLACE insert_opts opt_into NAME
     SET insert_asgn_list
@@ -1079,10 +1093,9 @@ update_stmt:
     opt_limit { 
         emit("UPDATE %d %d %d", $2, $3, $5); 
     }
-    | 
 ;
 update_opts: 
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | insert_opts LOW_PRIORITY {
@@ -1103,7 +1116,7 @@ update_asgn_list:
         $$ = 1;
     }
     | NAME '.' NAME COMPARISON expr {
-        if ($2 != 4) {
+        if ($4 != 4) {
             yyerror("bad insert assignment to %s.%s", $1, $3);
         }
 	    emit("ASSIGN %s.%s", $1, $3); 
@@ -1120,7 +1133,7 @@ update_asgn_list:
         $$ = $1 + 1;
     }
     | update_asgn_list ',' NAME '.' NAME COMPARISON expr {
-        if ($2 != 4) {
+        if ($6 != 4) {
             yyerror("bad insert assignment to %s.%s", $3, $5);
         }
 	    emit("ASSIGN %s.%s", $3, $5); 
@@ -1140,7 +1153,7 @@ create_database_stmt:
     }
 ;
 opt_if_not_exists: 
-    /*nil*/ {
+    %empty {
         $$ = 0;
     }
     | IF EXISTS {
@@ -1166,6 +1179,162 @@ set_expr:
     }
 ;
 create_table_stmt:
+    CREATE opt_temporary TABLE opt_if_not_exists NAME
+    '(' create_col_list ')' {
+        emit("CREATE %d %d %d %s", $2, $4, $7, $5);
+        free($5);
+    }
+    | CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+    '(' create_col_list ')' {
+        emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7);
+        free($5);
+        free($7);
+    }
+    | CREATE opt_temporary TABLE opt_if_not_exists NAME
+    '(' create_col_list ')' 
+    create_select_statement {
+        emit("CREATE %d %d %d %s", $2, $4, $7, $5);
+        free($5);
+    }
+    | CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+    '(' create_col_list ')' 
+    create_select_statement {
+        emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7);
+        free($5);
+        free($7);
+    }
+    | CREATE opt_temporary TABLE opt_if_not_exists NAME
+    create_select_statement {
+        emit("CREATE %d %d  %s", $2, $4, $5);
+        free($5);
+    }
+    | CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+    create_select_statement {
+        emit("CREATE %d %d %s.%s", $2, $4, $5, $7);
+        free($5);
+        free($7);
+    }
+;
+create_select_statement:
+;
+opt_temporary:
+    %empty {
+        $$ = 0;
+    }
+    | TEMPORARY {
+        $$ = 1;
+    }
+;
+create_col_list:
+    create_definition {
+        $$ = 1;
+    }
+    | create_col_list ',' create_definition {
+        $$ = $1 + 1;
+    }
+;
+create_definition: 
+    {                       // mid rule action
+        emit("STARTCOL");   // Will be replaced by non-terminal symbol $@1 with rule $@1:%empty
+    }                       // Function will be triggered when $@1 is reduced
+    NAME data_type column_atts {
+        emit("COLUMNDEF %d %s", $3, $2); 
+        free($2);
+    }
+    | PRIMARY KEY '(' column_list ')' {
+        emit("PRIKEY %d", $4);
+    }
+    | KEY '(' column_list ')' {
+        emit("KEY %d", $3);
+    }
+    | INDEX '(' column_list ')' {
+        emit("KEY %d", $3);
+    }
+    | FULLTEXT INDEX '(' column_list ')' { 
+        emit("TEXTINDEX %d", $4); 
+    }
+    | FULLTEXT KEY '(' column_list ')' { 
+        emit("TEXTINDEX %d", $4); 
+    }
+;
+opt_length: 
+    %empty {
+        $$ = malloc(sizeof(struct IenLttr));
+        $$->a = 0;
+        $$->b = 0;
+    }
+    | '(' INTNUM ')' {
+        $$ = malloc(sizeof(struct IenLttr));
+        $$->a = $2;
+        $$->b = 0;
+    }
+    | '(' INTNUM ',' INTNUM ')' {
+        $$ = malloc(sizeof(struct IenLttr));
+        $$->a = $2;
+        $$->b = $4;
+    }
+;
+opt_binary:
+    %empty {
+        $$ = 0;
+    }
+    | BINARY {
+        $$ = 4000;
+    }
+;
+data_type:
+; 
+column_atts:
+    %empty {
+        $$ = 0;
+    }
+    | column_atts NOT NULLX { 
+        emit("ATTR NOTNULL"); 
+        $$ = $1 + 1; 
+    }
+    | column_atts NULLX /*default $$ = $1*/
+    | column_atts DEFAULT STRING { 
+        emit("ATTR DEFAULT STRING %s", $3); 
+        free($3); 
+        $$ = $1 + 1; 
+    }
+    | column_atts DEFAULT INTNUM { 
+        emit("ATTR DEFAULT NUMBER %d", $3); 
+        $$ = $1 + 1; 
+    }
+    | column_atts DEFAULT APPROXNUM { 
+        emit("ATTR DEFAULT FLOAT %g", $3); 
+        $$ = $1 + 1; 
+    }
+    | column_atts DEFAULT BOOL { 
+        emit("ATTR DEFAULT BOOL %d", $3); 
+        $$ = $1 + 1; 
+    }
+    | column_atts AUTO_INCREMENT { 
+        emit("ATTR AUTOINC"); 
+        $$ = $1 + 1; 
+    }
+    | column_atts UNIQUE '(' column_list ')' { 
+        emit("ATTR UNIQUEKEY %d", $4); 
+        $$ = $1 + 1; 
+    }
+    | column_atts UNIQUE KEY { 
+        emit("ATTR UNIQUEKEY"); 
+        $$ = $1 + 1; 
+    }
+    | column_atts PRIMARY KEY { 
+        emit("ATTR PRIKEY"); 
+        $$ = $1 + 1; 
+    }
+    | column_atts KEY { 
+        emit("ATTR PRIKEY"); 
+        $$ = $1 + 1; 
+    }
+    | column_atts COMMENT STRING { 
+        emit("ATTR COMMENT %s", $3); 
+        free($3); 
+        $$ = $1 + 1; 
+    }
 ;
 %%
 
