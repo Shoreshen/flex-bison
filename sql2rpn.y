@@ -10,7 +10,8 @@
     double floatval;
     char* strval;
     int subtok;
-    struct IenLttr* intlen;
+    struct IntLen* intlen;
+    struct DataType* datatype;
 }
 
 %start stmt_list
@@ -36,14 +37,15 @@
 %type <intval> groupby_list opt_with_rollup opt_asc_desc
 %type <intval> table_references opt_inner_cross opt_outer
 %type <intval> left_or_right opt_left_or_right_outer column_list
-%type <intval> index_list opt_for_join
+%type <intval> index_list opt_for_join len_uz_type
 
 %type <intval> delete_opts delete_list
 %type <intval> insert_opts insert_vals insert_vals_list
 %type <intval> insert_asgn_list opt_if_not_exists update_opts update_asgn_list
 %type <intval> opt_temporary opt_binary opt_uz enum_list
-%type <intval> column_atts data_type opt_ignore_replace create_col_list
+%type <intval> column_atts opt_ignore_replace create_col_list
 %type <intlen> opt_length
+%type <datatype> data_type
 
  /*operator, precedence & association*/
 %right ASSIGN
@@ -281,7 +283,6 @@ stmt_list :
     stmt
     | stmt_list stmt ';'
 ;
-
 expr: 
     /*Name and string/number literal*/
     NAME {
@@ -515,7 +516,6 @@ expr:
         emit("NOW");
     }
 ;
-
 case_list:
     WHEN expr THEN expr {
         $$ = 1;
@@ -523,7 +523,7 @@ case_list:
     | case_list WHEN expr THEN expr {
         $$ = $1 + 1;
     }
-
+;
 interval_exp:
     INTERVAL expr DAY_HOUR{
         emit("NUMBER 1");
@@ -552,7 +552,6 @@ interval_exp:
         emit("NUMBER 9"); 
     }
 ;
-
 trim_tbl: 
     LEADING {
         emit("NUMBER 1");
@@ -564,7 +563,6 @@ trim_tbl:
         emit("NUMBER 3");
     }
 ;
-
 val_list: 
     expr {
         $$ = 1;
@@ -573,7 +571,6 @@ val_list:
         $$ = $3 + 1;
     }
 ;
-
 opt_val_list: 
     %empty {
         $$ = 0;
@@ -582,7 +579,6 @@ opt_val_list:
         $$ = $1;
     }
 ;
-
 stmt : 
     select_stmt {
         emit("STMT");
@@ -609,7 +605,6 @@ stmt :
         emit("STMT");
     }
 ;
-
 select_stmt:
     // `select xxxx`, without tables
     SELECT select_opts select_expr_list {
@@ -621,7 +616,6 @@ select_stmt:
         emit("SELECT %d %d %d", $2, $3, $5); 
     } 
 ;
-
 select_opts:
     %empty {
         $$ = 0;
@@ -687,13 +681,17 @@ select_expr_list:
         $$ = 1;
     }
 ;
-select_expr: expr opt_as_alias;
+select_expr: expr opt_as_alias
+;
 opt_as_alias: %empty
     | AS NAME {
         emit("ALIAS %s", $2);
         free($2);
     }
-    | NAME
+    | NAME {
+        emit("ALIAS %s", $2);
+        free($2);
+    }
 ;
 opt_where: 
     %empty
@@ -772,6 +770,7 @@ column_list:
         $$ = $1 + 1;
         free($3);
     }
+;
 table_references:
     table_reference {
         $$ = 1;
@@ -1157,14 +1156,18 @@ opt_if_not_exists:
         $$ = 0;
     }
     | IF EXISTS {
-        if ($2) {
+        if (!$2) {
             yyerror("IF EXISTS doesn't exist"); 
         }
         $$ = $2;
     }
 ;
-set_stmt: SET set_list;
-set_list: set_expr | set_list ',' set_expr;
+set_stmt: SET set_list
+;
+set_list: 
+    set_expr 
+    | set_list ',' set_expr
+;
 set_expr:
     USERVAR COMPARISON expr {
         if ($2 != 4) {
@@ -1216,6 +1219,20 @@ create_table_stmt:
     }
 ;
 create_select_statement:
+    opt_ignore_replace opt_as select_stmt {
+        emit("CREATESELECT %d", $1);
+    }
+;
+opt_ignore_replace:
+    %empty {
+        $$ = 0;
+    }
+    | IGNORE {
+        $$ = 1;
+    }
+    | REPLACE {
+        $$ = 2;
+    }
 ;
 opt_temporary:
     %empty {
@@ -1238,8 +1255,10 @@ create_definition:
         emit("STARTCOL");   // Will be replaced by non-terminal symbol $@1 with rule $@1:%empty
     }                       // Function will be triggered when $@1 is reduced
     NAME data_type column_atts {
-        emit("COLUMNDEF %d %s", $3, $2); 
+        emit("COLUMNDEF TYPE:%d,UZ:%d,BIN:%d,LEN1:%d,LEN2:%d %s", 
+            $3->type, $3->uz, $3->bin, $3->len1, $3->len2, $2); 
         free($2);
+        free($3)
     }
     | PRIMARY KEY '(' column_list ')' {
         emit("PRIKEY %d", $4);
@@ -1259,19 +1278,19 @@ create_definition:
 ;
 opt_length: 
     %empty {
-        $$ = malloc(sizeof(struct IenLttr));
-        $$->a = 0;
-        $$->b = 0;
+        $$ = malloc(sizeof(struct IntLen));
+        $$->len1 = 0;
+        $$->len2 = 0;
     }
     | '(' INTNUM ')' {
-        $$ = malloc(sizeof(struct IenLttr));
-        $$->a = $2;
-        $$->b = 0;
+        $$ = malloc(sizeof(struct IntLen));
+        $$->len1 = $2;
+        $$->len2 = 0;
     }
     | '(' INTNUM ',' INTNUM ')' {
-        $$ = malloc(sizeof(struct IenLttr));
-        $$->a = $2;
-        $$->b = $4;
+        $$ = malloc(sizeof(struct IntLen));
+        $$->len1 = $2;
+        $$->len2 = $4;
     }
 ;
 opt_binary:
@@ -1279,11 +1298,143 @@ opt_binary:
         $$ = 0;
     }
     | BINARY {
-        $$ = 4000;
+        $$ = 1;
+    }
+;
+opt_uz:
+    %empty {
+        $$ = 0
+    }
+    | opt_uz UNSIGNED {
+        $$ = $1 | 1;
+    }
+    | opt_uz ZEROFILL {
+        $$ = $1 | 1 << 1;
+    }
+;
+opt_csc:
+    %empty
+    | opt_csc CHAR SET STRING {
+        emit("COLCHARSET %s", $4);
+        free($4);
+    }
+    | opt_csc COLLATE STRING {
+        emit("COLCOLLATE %s", $3);
+        free($3);
+    }
+;
+len_uz_type:
+    TINYINT {
+        $$ = 1;
+    } 
+    | SMALLINT {
+        $$ = 2;
+    }
+    | MEDIUMINT {
+        $$ = 3;
+    }
+    | INT {
+        $$ = 4;
+    }
+    | INTEGER {
+        $$ = 5;
+    }
+    | BIGINT {
+        $$ = 6;
+    }
+    | REAL {
+        $$ = 7;
+    }
+    | DOUBLE {
+        $$ = 8;
+    }
+    | FLOAT {
+        $$ = 9;
+    }
+    | DECIMAL {
+        $$ = 10;
     }
 ;
 data_type:
-; 
+    BIT opt_length {
+        $$ = get_data_type(1, 0, 0, $1->len1, $1->len2);
+        free($1);
+    }
+    | len_uz_type opt_length opt_uz {
+        $$ = get_data_type($1, $3, 0, $1->len1, $1->len2);
+        free($2);
+    }
+    | DATE {
+        $$ = get_data_type(11, 0, 0, 0, 0);
+    }
+    | TIME {
+        $$ = get_data_type(12, 0, 0, 0, 0);
+    }
+    | TIMESTAMP {
+        $$ = get_data_type(13, 0, 0, 0, 0);
+    }
+    | DATETIME {
+        $$ = get_data_type(14, 0, 0, 0, 0);
+    }
+    | YEAR {
+        $$ = get_data_type(15, 0, 0, 0, 0);
+    }
+    | CHAR opt_length opt_csc {
+        $$ = get_data_type(16, 0, 0, $1->len1, $1->len2);
+    }
+    | VARCHAR '(' INTNUM ')' opt_csc {
+        $$ = get_data_type(17, 0, 0, $3, 0);
+    }
+    | BINARY opt_length {
+        $$ = get_data_type(18, 0, 0, $1->len1, $1->len2);
+        free($1);
+    }
+    | VARBINARY '(' INTNUM ')' {
+        $$ = get_data_type(19, 0, 0, $3, 0);
+    }
+    | TINYBLOB {
+        $$ = get_data_type(20, 0, 0, 0, 0);
+    }
+    | BLOB {
+        $$ = get_data_type(21, 0, 0, 0, 0);
+    }
+    | MEDIUMBLOB {
+        $$ = get_data_type(22, 0, 0, 0, 0);
+    }
+    | LONGBLOB {
+        $$ = get_data_type(23, 0, 0, 0, 0);
+    }
+    | TINYTEXT opt_binary opt_csc {
+        $$ = get_data_type(24, 0, $1, 0, 0);
+    }
+    | TEXT opt_binary opt_csc {
+        $$ = get_data_type(24, 0, $1, 0, 0);
+    }
+    | MEDIUMTEXT opt_binary opt_csc {
+        $$ = get_data_type(24, 0, $1, 0, 0);
+    }
+    | LONGTEXT opt_binary opt_csc {
+        $$ = get_data_type(24, 0, $1, 0, 0);
+    }
+    | ENUM '(' enum_list ')' opt_csc {
+        $$ = get_data_type(19, 0, 0, $3, 0);
+    }
+    | SET '(' enum_list ')' opt_csc {
+        $$ = get_data_type(19, 0, 0, $3, 0);
+    }
+;
+enum_list: 
+    STRING { 
+        emit("ENUMVAL %s", $1); 
+        free($1); 
+        $$ = 1; 
+    }
+    | enum_list ',' STRING { 
+        emit("ENUMVAL %s", $3); 
+        free($3); 
+        $$ = $1 + 1; 
+    }
+;
 column_atts:
     %empty {
         $$ = 0;
