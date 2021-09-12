@@ -280,7 +280,7 @@
 
 %%
 stmt_list : 
-    stmt
+    stmt ';'
     | stmt_list stmt ';'
 ;
 expr: 

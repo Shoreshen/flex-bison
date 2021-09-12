@@ -307,6 +307,35 @@ replace_stmt:
         free($4);
     }
 ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME
+   '(' create_col_list ')' { emit("CREATE %d %d %d %s", $2, $4, $7, $5); free($5); }
+   ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+   '(' create_col_list ')' { emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7);
+                          free($5); free($7); }
+   ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME
+   '(' create_col_list ')'
+create_select_statement { emit("CREATESELECT %d %d %d %s", $2, $4, $7, $5); free($5); }
+    ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME
+   create_select_statement { emit("CREATESELECT %d %d 0 %s", $2, $4, $5); free($5); }
+    ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+   '(' create_col_list ')'
+   create_select_statement  { emit("CREATESELECT %d %d 0 %s.%s", $2, $4, $5, $7);
+                              free($5); free($7); }
+    ;
+
+create_table_stmt: CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME
+   create_select_statement { emit("CREATESELECT %d %d 0 %s.%s", $2, $4, $5, $7);
+                          free($5); free($7); }
+    ;
 %%
 
 void
