@@ -296,10 +296,6 @@ expr:
         free($3);
     }
     | USERVAR {
-        emit("NAME %s", $1);
-        free($1);
-    }
-    | USERVAR {
         emit("USERVAR %s", $1);
         free($1);
     }
@@ -326,48 +322,37 @@ expr:
     | expr '*' expr{
         emit("MUL");
     }
-    | expr '/' expr
-    {
+    | expr '/' expr {
         emit("DIV");
     }
-    | expr '%' expr
-    {
+    | expr '%' expr {
         emit("MOD");
     }
-    | expr MOD expr
-    {
+    | expr MOD expr {
         emit("MOD");
     }
-    | '-' expr %prec UMINUS
-    {
+    | '-' expr %prec UMINUS {
         emit("NGE");
     }
-    | expr ANDOP expr
-    {
+    | expr ANDOP expr {
         emit("AND");
     }
-    | expr OR expr
-    {
+    | expr OR expr {
         emit("OR");
     }
-    | expr XOR expr
-    {
+    | expr XOR expr {
         emit("XOR");
     }
-    | expr '|' expr
-    {
+    | expr '|' expr {
         emit("BITOR");
     }
-    | expr '&' expr
-    {
+    | expr '&' expr {
         emit("BITAND");
     }
-    | expr '^' expr
-    {
+    | expr '^' expr {
         emit("BITXOR");
     }
-    | expr SHIFT expr
-    {
+    | expr SHIFT expr {
         if($2 == 1){
             emit("SHIFT left");
         } else {
@@ -430,9 +415,6 @@ expr:
     }
     | expr IN '(' select_stmt ')' {
         emit("CMPANYSELECT 3");
-    }
-    | expr NOT IN '(' select_stmt ')' {
-        emit("CMPANYSELECT 4");
     }
     | expr NOT IN '(' select_stmt ')' {
         emit("CMPANYSELECT 4");
@@ -514,6 +496,9 @@ expr:
     }
     | CURRENT_TIME{
         emit("NOW");
+    }
+    | BINARY expr %prec UMINUS { 
+        emit("STRTOBIN"); 
     }
 ;
 case_list:
@@ -689,8 +674,8 @@ opt_as_alias: %empty
         free($2);
     }
     | NAME {
-        emit("ALIAS %s", $2);
-        free($2);
+        emit("ALIAS %s", $1);
+        free($1);
     }
 ;
 opt_where: 
@@ -816,7 +801,7 @@ index_hint: %empty
     | IGNORE KEY opt_for_join '(' index_list ')' {
         emit("INDEXHINT %d %d", $5, 20 + $3);
     }
-    | IGNORE KEY opt_for_join '(' index_list ')' {
+    | FORCE KEY opt_for_join '(' index_list ')' {
         emit("INDEXHINT %d %d", $5, 30 + $3);
     }
 ;
@@ -1258,7 +1243,7 @@ create_definition:
         emit("COLUMNDEF TYPE:%d,UZ:%d,BIN:%d,LEN1:%d,LEN2:%d %s", 
             $3->type, $3->uz, $3->bin, $3->len1, $3->len2, $2); 
         free($2);
-        free($3)
+        free($3);
     }
     | PRIMARY KEY '(' column_list ')' {
         emit("PRIKEY %d", $4);
@@ -1303,7 +1288,7 @@ opt_binary:
 ;
 opt_uz:
     %empty {
-        $$ = 0
+        $$ = 0;
     }
     | opt_uz UNSIGNED {
         $$ = $1 | 1;
@@ -1357,11 +1342,11 @@ len_uz_type:
 ;
 data_type:
     BIT opt_length {
-        $$ = get_data_type(1, 0, 0, $1->len1, $1->len2);
-        free($1);
+        $$ = get_data_type(1, 0, 0, $2->len1, $2->len2);
+        free($2);
     }
     | len_uz_type opt_length opt_uz {
-        $$ = get_data_type($1, $3, 0, $1->len1, $1->len2);
+        $$ = get_data_type($1, $3, 0, $2->len1, $2->len2);
         free($2);
     }
     | DATE {
@@ -1380,14 +1365,15 @@ data_type:
         $$ = get_data_type(15, 0, 0, 0, 0);
     }
     | CHAR opt_length opt_csc {
-        $$ = get_data_type(16, 0, 0, $1->len1, $1->len2);
+        $$ = get_data_type(16, 0, 0, $2->len1, $2->len2);
+        free($2);
     }
     | VARCHAR '(' INTNUM ')' opt_csc {
         $$ = get_data_type(17, 0, 0, $3, 0);
     }
     | BINARY opt_length {
-        $$ = get_data_type(18, 0, 0, $1->len1, $1->len2);
-        free($1);
+        $$ = get_data_type(18, 0, 0, $2->len1, $2->len2);
+        free($2);
     }
     | VARBINARY '(' INTNUM ')' {
         $$ = get_data_type(19, 0, 0, $3, 0);
@@ -1405,16 +1391,16 @@ data_type:
         $$ = get_data_type(23, 0, 0, 0, 0);
     }
     | TINYTEXT opt_binary opt_csc {
-        $$ = get_data_type(24, 0, $1, 0, 0);
+        $$ = get_data_type(24, 0, $2, 0, 0);
     }
     | TEXT opt_binary opt_csc {
-        $$ = get_data_type(24, 0, $1, 0, 0);
+        $$ = get_data_type(24, 0, $2, 0, 0);
     }
     | MEDIUMTEXT opt_binary opt_csc {
-        $$ = get_data_type(24, 0, $1, 0, 0);
+        $$ = get_data_type(24, 0, $2, 0, 0);
     }
     | LONGTEXT opt_binary opt_csc {
-        $$ = get_data_type(24, 0, $1, 0, 0);
+        $$ = get_data_type(24, 0, $2, 0, 0);
     }
     | ENUM '(' enum_list ')' opt_csc {
         $$ = get_data_type(19, 0, 0, $3, 0);

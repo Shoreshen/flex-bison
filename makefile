@@ -23,7 +23,7 @@ LEX_TRG		:= $(LEX_FILE)
 LEX_DEP		:= $(LEX_FILE) $(BISON_OUT_H)
 GCC_TRG		:= $(BISON_OUT_C) $(LEX_OUT) $(C_FILE) 
 GCC_DEP		:= $(GCC_TRG) $(H_FILE) $(BISON_OUT_H)
-BISON_FLAG	:= -d --report=all # --report=all produce name.output, indicating conflict
+BISON_FLAG	:= -d -Wcounterexamples # --report=all produce name.output, indicating conflict
 
 CFLAGS		= -g -lm
 test:

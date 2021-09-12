@@ -111,6 +111,13 @@ When facing a shift/reduce conflict, bison will compare the reduce production ru
 1. If rule's precedence higher than symbol's, then reduce
 2. If symbol's precedence higher than rule's, then shift
 
+### Example
+
+1. `%prec`: In the following example, the rule's precedence will be `UMINUS` instead of last terminal symbol (which is `'-'`) due to the use of `%prec`. However, the UMINUS does not actually a part of the reducing rule.
+   ```bision
+   expr: '-' exp %prec UMINUS { $$ = newast('M', $2, NULL); }
+   ```
+
 ## Association
 
 Mechanism to resolve shift/reduce conflict with the same terminal symbol.
