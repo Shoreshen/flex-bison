@@ -25,3 +25,7 @@ static inline struct DataType* get_data_type(int type, int uz, int bin, int len1
     data->bin = bin;
     return data;
 }
+
+void yyerror(char *s, ...);
+extern int yylex();
+extern int yylineno;

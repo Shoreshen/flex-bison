@@ -25,7 +25,8 @@ GCC_TRG		:= $(BISON_OUT_C) $(LEX_OUT) $(C_FILE)
 GCC_DEP		:= $(GCC_TRG) $(H_FILE) $(BISON_OUT_H)
 BISON_FLAG	:= -d -Wcounterexamples # --report=all produce name.output, indicating conflict
 									# -Wcounterexamples print out conflict example in terminal
-CFLAGS		= -g -lm
+CFLAGS		= -g -lm -DYYDEBUG=1 # -DYYDEBUG=1 define the macro so that yydebug can be used
+
 test:
 	@echo $(proj)
 	@echo $(ALL_FILES)

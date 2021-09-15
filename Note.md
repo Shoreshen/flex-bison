@@ -21,11 +21,13 @@ Start condition can be classified as:
 1. <a id=mk1></a>Exclusive condition: when condition `sc` is satisfied, only expressions with prefix `<sc>` is activated
 2. <a id=mk2></a>Inclusive condition: when condition `sc` is satisfied, both expressions without prefix or with prefix `<sc>` is activated
 
+There is a defualt start condition, which can be referenced by macro `INITIAL`.
+
 ### Define a start condition
 
 Using `%x <sc_name>` in [first section](#1st_sec) to define an [exclusive start condition](#mk1)
 
-Using `%x <sc_name>` in [first section](#1st_sec) to define an [inclusive start condition](#mk2)
+Using `%s <sc_name>` in [first section](#1st_sec) to define an [inclusive start condition](#mk2)
 
 ### Start condition expression
 
@@ -71,6 +73,12 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 9. `^` Matches the beginning of a line as the first character of a regular expression.
 10. `r/s` an `r` but only if it is followed by an `s`.
 11. `r$` an `r`, but only at the end of a line (i.e., just before a newline). Equivalent to `r/\n`
+
+## Macro and functions
+
+1. `BEGIN BTWMODE`: start the [start condition](#start-condition) name `BTWMODE`
+2. `input()`: Read the next char and pop it out of the stack
+3. `unput(c)`: Push c into the stack as the next char
 
 # Bison
 
