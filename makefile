@@ -63,6 +63,11 @@ run_lex:$(proj).out
 	read file; \
 	./$< $$file
 
+run_file:$(proj).out
+	@echo "Please type in file names: "; \
+	read file; \
+	./$< $$file
+
 PHONY += run run_wc run_lex
 # Clean =========================================================================================
 clean:
