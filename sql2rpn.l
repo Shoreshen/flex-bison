@@ -371,7 +371,9 @@ COUNT {
     return NAME; 
 }
 
-`[^`\n]*$               { yyerror("unterminated quoted name %s", yytext); }
+`[^`\n]*$ { 
+    yyerror("unterminated quoted name %s", yytext); 
+}
 
  /* user variables */
 @[0-9a-z_.$]+ |
