@@ -127,6 +127,7 @@ By key words `%left`, `%right` , `%nonassoc` or `%precedence` following by a str
 2. Symbols defined in a same line (e.g. `%left op1 op2`) has the same precedence
 3. `%left`, `%right`, `%nonassoc` define precedence and [association](#association) of the symbol
 4. `%precedence` only define the precedence of the symbol
+5. If not declared, symbol has no precedence
 
 ### Mechanism
 
@@ -135,6 +136,7 @@ Bison assign terminal symbols with the precedence it is defined, production rule
 When facing a shift/reduce conflict, bison will compare the reduce production rule's precedence with the precedence of next symbol reading in, and do:
 1. If rule's precedence higher than symbol's, then reduce
 2. If symbol's precedence higher than rule's, then shift
+3. If rule or symbol do not have precedence, bison will treat them as no precedence
 
 ### Example
 
