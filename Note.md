@@ -55,10 +55,12 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 1. Quotes tell flex to match the exact strings rather than regular expressions.
    1. e.g.:`"+"` means match once a `+` is found in the source code
 2. <a id=char_class></a>`[]` character class, matches any character within the brackets
+   Note that inside of a character class, all regular expression operators lose their special meaning except:
    1. `^` as the first character to indicate a "negated character class", match any character except the ones in the brackets;<br>
       e.g. `[^09]` means match any character except `0` and `9`
    2. `-` represent character range based on the ACSII convention<br>
       e.g. `[0-9]` means ACSII that is greater than 48('0') and smaller than 57('9')
+   3. `\` used to escape special charactors and ANSI-C interpretation
 3. `{}` 3 functions:
    1. Indicating range of number of times a character continually appears, e.g. `A{1,4}` means accept `A`, `AA`, `AAA`
    2. Indicating exact number of times a character continually appears, e.g. `A{4}` means accept `AAAA`
@@ -81,6 +83,18 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
 3. `unput(c)`: Push c into the stack as the next char
 
 # Bison
+
+## Scanning patterns
+
+1. By defualt, bison will prefer shift rather than reduce
+
+## key words
+
+1. `%token <TYPE> NAME, NAME, ...`: 
+   1. Declare a terminal symbols (token) with type of `TYPE` and name of `NAME`, without associativity/precedence.
+   2. All terminal symbols need to be declared
+   3. Out put to `*.tab.c` for lexer to use
+2. `%type <TYPE> NAME, NAME, ...`: Declare type of `TYPE` for non-terminal symbol name of `NAME`
 
 ## Mid rule action
 
@@ -107,9 +121,12 @@ Mechanism to resolve shift/reduce conflict by assigning precedence level to prod
 
 ### Defining
 
-By key words `%left`, `%right` , `%nonassoc` or `%precedence` following by a string of terminal symbols to define the level precedence.
+By key words `%left`, `%right` , `%nonassoc` or `%precedence` following by a string of terminal symbols to define their level of precedence by the following rules:
 
-With level precedence, the later defined terminal symbols have the higher precedence.
+1. The later defined terminal symbols have the higher precedence
+2. Symbols defined in a same line (e.g. `%left op1 op2`) has the same precedence
+3. `%left`, `%right`, `%nonassoc` define precedence and [association](#association) of the symbol
+4. `%precedence` only define the precedence of the symbol
 
 ### Mechanism
 
@@ -132,11 +149,13 @@ Mechanism to resolve shift/reduce conflict with the same terminal symbol.
 
 ### Defining
 
-By keywords `%left` following by a string of terminal symbols to define left association
+Association is defined by the following rules:
 
-By keywords `%right` following by a string of terminal symbols to define right association
-
-By keywords `%nonassoc` following by a string of terminal symbols to define no non-associative symbol, which means that `x op y op z` is considered a syntax error, where `op` is the non-associative symbol.
+1. `%left op1, op2, ...` define left association of `op`s
+2. `%right op1, op2, ...` define right association of `op`s
+3. `%nonassoc op1, op2, ...` define no non-associative of `op`s, which means that `x op y op z` is considered a syntax error, where `op` is the non-associative symbol.
+4. `op`s defined in a same line is nested for association
+   e.g: Defining `%right op1, op2` with stack `exp_1 op1 exp_2 op2 exp_3` since `op1`, `op2` is nested for right association, `exp_2 op2 exp_3` will be reduced first 
 
 ### Mechanism
 
