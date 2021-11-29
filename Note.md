@@ -95,6 +95,9 @@ To define a start condition `sc` specific expression, using `<sc>...` while `...
    2. All terminal symbols need to be declared
    3. Out put to `*.tab.c` for lexer to use
 2. `%type <TYPE> NAME, NAME, ...`: Declare type of `TYPE` for non-terminal symbol name of `NAME`
+3. `%code{code}`: Defining the inserting point of the `{code}`
+   1. `%code requires {code}`: Best place to re-define `YYSTYPE` and `YYLTYPE`; Also will be generated in parser header file (*.tab.h)
+   2. `%code top {code}`: Near the top of the parser implementation file
 
 ## Mid rule action
 
@@ -189,3 +192,30 @@ If bison encountered an error while parsing `exp`, then:
 ### Macros
 
 1. `yyerrok`: Ignore current error and continue parsing
+
+# Location
+
+## FLex
+
+1. Macro `YY_USER_ACTION`: Define the action to be taken when a token is recognized.
+
+## Bison
+
+1. Locations are stored in `YYLTYPE` structures, which by default are declared as follows:
+   ```c
+   typedef struct YYLTYPE {
+      int first_line;
+      int first_column;
+      int last_line;
+      int last_column;
+   } YYLTYPE;
+   ```
+2. Reducing: LHS's loacation will be set from the beginning of the first RHS symbol to the end of the last RHS symbol.
+3. Rule with an empty RHS uses the location information of the previous item in the parse stack
+4. Bison refer to the location of the LHS symbol as `@$` and the RHS as `@1`, `@2`, and so forth
+5. Location code added when:
+   1. Reference to an `@N` location in the action code
+   2. `%locations` in the declaration part
+6. `YYRHSLOC(rhs, k)` Is the location of:
+   1. `k`th symbol in rhs when `k` is positive
+   2. Symbol of stack top when `k` is zero and RHS is empty
