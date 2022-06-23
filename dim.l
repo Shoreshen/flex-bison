@@ -4,42 +4,32 @@
 %option yylineno
 
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    int count = 0;
-    void test(char* src);
+    #include "dim.h"
 %}
-
+TYPE ("int"|"logic")
 ID ([a-zA-Z][a-zA-Z0-9_]*)
 NUM ([0-9]+)
-DIM "["({NUM}|{ID})"]"
+DIM ("["({NUM}|{ID})"]"[ ]*)
 
 %%
-{ID}{DIM}+ {
-    test(yytext);
+"module" |
+"function" {
+    printf(yytext);
+    push_map();
+}
+"endmodule" |
+"endfunction" {
+    printf(yytext);
+    pop_map();
+}
+{TYPE}[ ]+{ID}[ ]*{DIM}+ {
+    def_id(yytext);
+}
+{ID}[ ]*{DIM}+ {
+    use_id(yytext);
 }
 
 .|\n  {
     printf(yytext);
 }
 %%
-
-//==============================================================================================
-// Main func
-//==============================================================================================
-int main(int argc, char **argv)
-{
-    int i;
-    for(i = 1; i < argc; i++) {
-        if(!(yyin = fopen(argv[i], "r"))) {
-            perror(argv[1]);
-            return 1;
-        }
-        yylex();
-    }
-    return 0;
-}
-void test(char* src)
-{
-    count++;
-}

@@ -55,6 +55,8 @@ ifneq (,$(GCC_TRG))
 	gcc $(CFLAGS) $(GCC_TRG) -o $@
 endif
 
+build:$(proj).out
+
 run:$(proj).out
 	./$<
 
@@ -68,7 +70,7 @@ run_file:$(proj).out
 	read file; \
 	./$< $$file
 
-PHONY += run run_wc run_lex
+PHONY += build run run_wc run_lex
 # Clean =========================================================================================
 clean:
 	-rm *.out *.lex *.yy.c *.tab.h *.tab.c *.s *.output
