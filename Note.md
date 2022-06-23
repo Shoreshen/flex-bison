@@ -219,3 +219,7 @@ If bison encountered an error while parsing `exp`, then:
 6. `YYRHSLOC(rhs, k)` Is the location of:
    1. `k`th symbol in rhs when `k` is positive
    2. Symbol of stack top when `k` is zero and RHS is empty
+
+# Debug
+
+For output c file of flex and bison, need to remove regular expression `#line[ 0-9a-z"\.]*` in order to set correct break point line.
